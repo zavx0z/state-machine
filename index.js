@@ -1,4 +1,4 @@
-import { toMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.4/+esm"
+import { toMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
 
 const template = document.createElement("template")
 template.innerHTML = ``
@@ -16,13 +16,15 @@ class StateMachine extends HTMLElement {
         this.machine.start()
       })
   }
-  listeners = []
+  /** @type {import("types").SubscribeCallback[]} */
+  listeners = [(state, event) => console.log(state, event)]
+  /** Подписка на события машины
+   * @param {import("types").SubscribeCallback} callback
+   * @returns unsubscribe function
+   */
   subscribe(callback) {
     this.listeners.push(callback)
-    return () => {
-      this.listeners.pop(callback)
-      console.log(this.listeners)
-    }
+    return () => this.listeners.splice(this.listeners.indexOf(callback), 1)
   }
   send({ type, params }) {
     this.machine.send({ type, params })

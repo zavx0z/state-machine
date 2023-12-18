@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "module": "NodeNext",
+        "baseUrl": ".",
+        "paths": {
+            "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm": [
+                "../dist"
+            ],
+            "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/+esm": [
+                "../node_modules/elkjs"
+            ],
+        },
+    }
+}
