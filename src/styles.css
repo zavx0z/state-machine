@@ -142,5 +142,13 @@
   padding-bottom: 0.5rem /* 8px */;
 }
 .node-fn {
-  
+  margin-bottom: 0.5rem /* 8px */;
+}
+.node-fn::before {
+  content: attr(data-type) " / ";
+  font-size: 0.75rem /* 12px */;
+  line-height: 1rem /* 16px */;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.5;
 }

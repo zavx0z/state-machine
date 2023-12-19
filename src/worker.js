@@ -1,4 +1,4 @@
-import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
+import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.5/+esm"
 import { convertToGraph } from "./utils/directedGraph.js"
 import { createSimulator } from "./simulator.js"
 

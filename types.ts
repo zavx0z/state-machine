@@ -7,7 +7,7 @@ import type {
   AnyEventObject,
   EventObject,
   Interpreter,
-} from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
+} from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.5/+esm"
 export type MachineJSON = StateNodeDefinition<any, any, any> & { transition: string[] }
 type GraphLayout = { width: number; height: number; x: number; y: number }
 export type NodesState = Map<string, NodeState>
@@ -54,4 +54,4 @@ export {
   EventType,
   EventObject,
   Interpreter,
-} from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
+} from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.5/+esm"
