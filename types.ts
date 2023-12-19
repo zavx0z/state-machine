@@ -47,7 +47,7 @@ export type InterpreterMachine<TContext, TEvent> = Interpreter<
   TEvent extends EventObject ? TEvent : EventObject,
   any
 >
-
+export type AnyStateNodeDefinition = StateNodeDefinition<any, any, any>
 export {
   AnyStateMachine,
   AnyState,

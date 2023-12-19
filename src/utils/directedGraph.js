@@ -10,15 +10,15 @@
 const flatten = (array) => Array.prototype.concat.apply([], array)
 
 /** Converts a state machine or state node to a graph representation.
- *@param {MachineJSON} machine - The state machine to convert.
- * @returns {{edges: EdgesTransition; nodes: NodesState}} - Ноды и грани
+ * @param {MachineJSON} machine - The state machine to convert.
+ * @returns {{edges: import("types").EdgesTransition; nodes: import("types").NodesState}} - Ноды и грани
  */
 export function convertToGraph(machine) {
-  const /**@type {EdgesTransition} */ edges = new Map()
-  const /**@type {NodesState} */ nodes = new Map()
+  const /**@type {import("types").EdgesTransition} */ edges = new Map()
+  const /**@type {import("types").NodesState} */ nodes = new Map()
 
   /** Generates a directed graph representation of a state machine or state node.
-   * @typedef {MachineJSON | import("@metafor/machine").StateNodeDefinition<any, any, any>} StateNode
+   * @typedef {MachineJSON | import("types").AnyStateNodeDefinition} StateNode
    * @param {StateNode} stateNode - The state machine or state node.
    * @param {string | undefined}  parentID - StateNode parent id
    */

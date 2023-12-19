@@ -19,5 +19,5 @@ onmessage = ({ data }) => {
   simulator.send({ type: "PREVIEW.CLEAR" })
 
   const { edges, nodes } = convertToGraph(machineObj)
-  postMessage({ edges, nodes })
+  postMessage({ type: "machine.init", params: { edges, nodes } })
 }
