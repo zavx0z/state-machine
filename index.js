@@ -24,10 +24,23 @@ class StateMachine extends HTMLElement {
           }
           const containerNodes = document.createElement("div")
           containerNodes.innerHTML = nodesElements
+
+          const observer = new MutationObserver(function (mutations) {
+            if (shadowRoot.contains(containerNodes)) {
+              const bb = [...containerNodes.children].map((node) => {
+                const { width, height } = node.getBoundingClientRect()
+                return { id: node.id, width, height }
+              })
+              console.log(bb)
+              observer.disconnect()
+            }
+          })
+          observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: true })
           shadowRoot.append(containerNodes)
           break
         default:
           console.log("worker", type)
+          break
       }
     }
 
@@ -35,7 +48,6 @@ class StateMachine extends HTMLElement {
       .then((Response) => Response.text())
       .then((xml) => {
         const machine = toMachine(xml, {})
-
         worker.postMessage(JSON.stringify(machine.toJSON()))
         this.machine = interpret(machine)
         this.machine.onTransition((state, event) => this.listeners.forEach((callback) => callback(state, event)))

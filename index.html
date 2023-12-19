@@ -28,9 +28,9 @@
             machine.send({ type: "turn.on" })
             break
           default:
+            console.log(event.type, state.value)
             break
         }
-        console.log(state, event)
       })
     </script>
     <dev-tools mobile></dev-tools>
