@@ -4,6 +4,7 @@ import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.n
  * @typedef {import("types").AnyStateMachine} AnyStateMachine
  * @typedef {import("types").EventType} EventType
  * @typedef {import("types").EventObject} EventObject
+ * @typedef {import("types").ActorLogic} ActorLogic
 /** Context
  * @typedef {Object} InputType
  * @property {AnyStateMachine} InputType.machine - Машина конечного автомата (AnyStateMachine)

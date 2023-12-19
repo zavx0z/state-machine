@@ -7,7 +7,6 @@ class StateMachine extends HTMLElement {
     super()
     const shadowRoot = this.attachShadow({ mode: "closed" })
     shadowRoot.appendChild(template.content.cloneNode(true))
-
     fetch(this.getAttribute("src"))
       .then((Response) => Response.text())
       .then((xml) => {
@@ -17,7 +16,7 @@ class StateMachine extends HTMLElement {
       })
   }
   /** @type {import("types").SubscribeCallback[]} */
-  listeners = [(state, event) => console.log(state, event)]
+  listeners = []
   /** Подписка на события машины
    * @param {import("types").SubscribeCallback} callback
    * @returns unsubscribe function

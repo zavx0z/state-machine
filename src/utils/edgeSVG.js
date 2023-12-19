@@ -1,3 +1,22 @@
+/**
+ * @typedef {{point: Point, side: Sides}} RectIntersection
+ * @typedef {{x: number, y: number}} Point
+ * @typedef {{p1: Point, p2: Point, p: Point}} CubicCurve
+ * @typedef {{x: number, y: number}} Vector
+ * @typedef {[Point, Point]} LineSegment
+ * @typedef {Point[]} Path
+ * @typedef {"top"| "right" | "bottom" | "left"} Sides
+ * @typedef {MPathParam | LPathParam | ZPathParam | CPathParam | QPathParam} PathParam
+ * @typedef {[MPathParam, ...PathParam[]]} SvgPath
+ * @typedef {["M", Point]} MPathParam
+ * @typedef {["L", Point]} LPathParam
+ * @typedef {["Z"]} ZPathParam
+ * @typedef {["C", Point, Point, Point]} CPathParam
+ * @typedef {["Q", Point, Point]} QPathParam
+ * @typedef {[SidePoint, SidePoint]} SideLineSegment
+ * @typedef {Point & {side: Sides}} SidePoint
+ */
+
 /** simplifyPoints
  * @param {Point[]} points
  * @returns {Point[]}
@@ -46,16 +65,16 @@ export function withMidpoints(points) {
 /** getSvgPath
  * @param {Point} sourcePoint
  * @param {Point} targetPoint
- * @param {Sides} side
+ * @param {Sides} [side="top"]
  * @returns {SvgPath}
  */
-export function getSvgPath(sourcePoint, targetPoint, side = Sides.Top) {
+export function getSvgPath(sourcePoint, targetPoint, side = "top") {
   const preStartPoint = sourcePoint
   const startPoint = { x: sourcePoint.x + 20, y: sourcePoint.y }
   const endPoint = targetPoint
   const endSide = side
-  const /* @type {SvgPath} */ svgPath = [["M", sourcePoint]]
-  const /* @type {Point[]} */ points = [preStartPoint, startPoint]
+  const /** @type {SvgPath} */ svgPath = [["M", sourcePoint]]
+  const /** @type {Point[]} */ points = [preStartPoint, startPoint]
   const midX = (endPoint.x - startPoint.x) / 2 + startPoint.x
   const midY = (endPoint.y - startPoint.y) / 2 + startPoint.y
   switch (endSide) {
@@ -105,7 +124,6 @@ export const isBendable = (p1, corner, p2) =>
  */
 const lineToVector = (p1, p2) => {
   const vector = {
-    type: "vector",
     x: p2.x - p1.x,
     y: p2.y - p1.y,
   }
@@ -119,7 +137,6 @@ const vectorToUnitVector = (v) => {
   let magnitude = v.x * v.x + v.y * v.y
   magnitude = Math.sqrt(magnitude)
   const unitVector = {
-    type: "vector",
     x: v.x / magnitude,
     y: v.y / magnitude,
   }
@@ -216,22 +233,22 @@ export function getPath(sourceRect, labelRect, targetRect, targetPoint) {
   const endPoint = targetPoint
   const endSide = intersections[0].side
   switch (endSide) {
-    case Sides.Top:
+    case "top":
       endPoint.y -= 10
       break
-    case Sides.Left:
+    case "left":
       endPoint.x -= 10
       break
-    case Sides.Bottom:
+    case "bottom":
       endPoint.y += 10
       break
-    case Sides.Right:
+    case "right":
       endPoint.x += 10
       break
     default:
       break
   }
-  const preSvgPath = getSvgPath({ x: sourceRect.right, y: sourceRect.top }, edgeEntryPoint, Sides.Left)
+  const preSvgPath = getSvgPath({ x: sourceRect.right, y: sourceRect.top }, edgeEntryPoint, "left")
   const svgPath = getSvgPath(edgeExitPoint, endPoint, endSide)
   // @ts-ignore
   return preSvgPath.concat(svgPath)
@@ -272,34 +289,35 @@ function segmentIntersection(ls1, ls2) {
  */
 function rectIntersection(ls, rect) {
   const top = {
+    side: "top",
     point: segmentIntersection(ls, [
       { x: rect.left, y: rect.top },
       { x: rect.right, y: rect.top },
     ]),
-    side: Sides.Top,
   }
   const right = {
+    side: "right",
     point: segmentIntersection(ls, [
       { x: rect.right, y: rect.top },
       { x: rect.right, y: rect.bottom },
     ]),
-    side: Sides.Right,
   }
   const bottom = {
+    side: "bottom",
     point: segmentIntersection(ls, [
       { x: rect.right, y: rect.bottom },
       { x: rect.left, y: rect.bottom },
     ]),
-    side: Sides.Bottom,
   }
   const left = {
+    side: "left",
     point: segmentIntersection(ls, [
       { x: rect.left, y: rect.bottom },
       { x: rect.left, y: rect.top },
     ]),
-    side: Sides.Left,
   }
-  return [top, right, bottom, left].filter((ix) => ix.point !== false)
+  // @ts-ignore
+  return [top, right, bottom, left].filter((ix) => Boolean(ix.point) !== false)
 }
 /**
  *
