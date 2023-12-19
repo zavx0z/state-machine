@@ -1,23 +1,23 @@
-import { createMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
-import { convertToGraph } from "./utils/directedGraph"
+import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
+import { convertToGraph } from "./utils/directedGraph.js"
+import { createSimulator } from "./simulator.js"
 
 onmessage = ({ data }) => {
-  const /**@type {import("types").MachineJSON} */ machineObj = JSON.parse(data.machine)
+  postMessage({ type: "WORKER.LOADING" })
+  const /**@type {import("types").MachineJSON} */ machineObj = JSON.parse(data)
   machineObj["predictableActionArguments"] = true // TODO: predictableActionArguments set default true
   const machine = createMachine(machineObj)
-  // console.log(machine)
-  const actor = interpret(machine).start()
-  actor.onTransition((state, transition) => {
-    // console.log(state, transition)
+
+  const simulator = createSimulator({
+    machine: machine,
+    state: machine.getInitialState(null),
+  }).start()
+
+  simulator.onTransition((state, transition) => {
+    console.log(state, transition)
   })
-  actor.send({ type: "go.two" })
+  simulator.send({ type: "PREVIEW.CLEAR" })
 
-  const channel = new BroadcastChannel(machineObj.id)
   const { edges, nodes } = convertToGraph(machineObj)
-  channel.postMessage({ edges, nodes })
+  postMessage({ edges, nodes })
 }
-
-// const simulator = createSimulator({
-//   machine: TestMachine,
-//   state: TestMachine.getInitialState(null as any),
-// }).start()

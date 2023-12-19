@@ -5,6 +5,8 @@ import type {
   AnyState,
   StateNodeDefinition,
   AnyEventObject,
+  EventObject,
+  Interpreter,
 } from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
 export type MachineJSON = StateNodeDefinition<any, any, any> & { transition: string[] }
 type GraphLayout = { width: number; height: number; x: number; y: number }
@@ -39,9 +41,17 @@ export type Point = { x: number; y: number }
 export type SubscribeCallback = (state: AnyState, event: AnyEventObject) => void
 export type RelativeNodeEdgeMap = [Map<string | undefined, string[]>, Map<string, string | undefined>]
 
+export type InterpreterMachine<TContext, TEvent> = Interpreter<
+  TContext,
+  any,
+  TEvent extends EventObject ? TEvent : EventObject,
+  any
+>
+
 export {
   AnyStateMachine,
   AnyState,
   EventType,
   EventObject,
+  Interpreter,
 } from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"

@@ -4,7 +4,7 @@ import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.n
  * @typedef {import("types").AnyStateMachine} AnyStateMachine
  * @typedef {import("types").EventType} EventType
  * @typedef {import("types").EventObject} EventObject
- * @typedef {import("types").ActorLogic} ActorLogic
+ * @typedef {import("types").Interpreter} Interpreter
 /** Context
  * @typedef {Object} InputType
  * @property {AnyStateMachine} InputType.machine - Машина конечного автомата (AnyStateMachine)
@@ -16,17 +16,23 @@ import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.n
  * @typedef { { type: "STATE.UPDATE"; state: AnyState } } STATE_UPDATE
  * @typedef { { type: "MACHINE.UPDATE"; machine: AnyStateMachine } } MACHINE_UPDATE
  * @typedef { { type: "PREVIEW.CLEAR" } } PREVIEW_CLEAR
+ * @typedef { EVENT | EVENT_PREVIEW | STATE_UPDATE | MACHINE_UPDATE | PREVIEW_CLEAR } SimulatorEvents
 /** Schema 
  * @typedef {Object} schema
- * @property { EVENT | EVENT_PREVIEW | STATE_UPDATE | MACHINE_UPDATE | PREVIEW_CLEAR } [schema.events]
+ * @property {SimulatorEvents} [schema.events]
  * @property {InputType} [schema.context]
+
+ * @typedef {import("types").InterpreterMachine<InputType, SimulatorEvents>} Simulator
 */
 
-// type SimulatorActorType = Actor<ActorLogic<any, SimulatorEvents, any, any>>
-export function createSimulator(/** @type {InputType} */ input) {
+/**
+ * @param {InputType} input
+ * @returns {Simulator}
+ */
+export function createSimulator(input) {
   const machine = createMachine({
     predictableActionArguments: true,
-    id: "simService",
+    id: "simulator",
     /** @type {schema} */
     schema: {},
     initial: "active",
