@@ -1,15 +1,11 @@
-import type { ElkEdgeSection, ElkExtendedEdge, ElkNode } from "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/+esm"
+import type { ElkEdgeSection } from "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/+esm"
 export {}
 import type {
   TransitionDefinition,
-  AnyStateNode,
-  StateNode,
   AnyState,
-  AnyStateMachine,
   StateNodeDefinition,
   AnyEventObject,
 } from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
-export { AnyStateMachine, AnyState }
 export type MachineJSON = StateNodeDefinition<any, any, any> & { transition: string[] }
 type GraphLayout = { width: number; height: number; x: number; y: number }
 export type NodesState = Map<string, NodeState>
@@ -41,5 +37,11 @@ export type EdgeTransition = {
 }
 export type Point = { x: number; y: number }
 export type SubscribeCallback = (state: AnyState, event: AnyEventObject) => void
-
 export type RelativeNodeEdgeMap = [Map<string | undefined, string[]>, Map<string, string | undefined>]
+
+export {
+  AnyStateMachine,
+  AnyState,
+  EventType,
+  EventObject,
+} from "https://cdn.jsdelivr.net/npm/@metafor/machine@latest/+esm"
