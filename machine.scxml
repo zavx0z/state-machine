@@ -26,6 +26,12 @@
     </state>
 
     <state id="cooking">
+      <onentry>
+        <script src="entry action"/>
+      </onentry>
+      <onexit>
+        <script src="exit action"/>
+      </onexit>
       <invoke src="timerService"/>
       <transition event="door.open" target="idle">
         <assign location="door_closed" expr="false" />

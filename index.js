@@ -1,4 +1,4 @@
-import { toMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.5/+esm"
+import { toMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 import State from "./src/components/State.js"
 
 const template = document.createElement("template")

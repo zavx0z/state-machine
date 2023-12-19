@@ -1,4 +1,4 @@
-import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.5/+esm"
+import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 /**
  * @typedef {import("types").AnyState} AnyState
  * @typedef {import("types").AnyStateMachine} AnyStateMachine
