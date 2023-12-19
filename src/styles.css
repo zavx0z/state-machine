@@ -1,4 +1,8 @@
 :host {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  font-size: 1rem; /* 16px */
+  line-height: 1.5rem; /* 24px */
   /* =~= Theme Colors =~= */
   /* primary | #87ceeb */
   --color-primary-50: 237 248 252; /* ⬅ #edf8fc */
