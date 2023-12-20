@@ -2,23 +2,31 @@ import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0
 import { convertToGraph } from "./utils/directedGraph.js"
 import { createSimulator } from "./simulator.js"
 /**
- * @typedef {Object} Node
- * @extends import("../index.js").NodeInfo
+ * @typedef {Object} Size
+ * @property {number} width
+ * @property {number} height
  *
- * @typedef {Object} Edge
- * @extends import("../index.js").EdgeInfo
+ * @typedef {object} GraphSize
+ * @property {Map<string, Size>} nodes
+ * @property {Map<string, Size>} edges
  *
- * @typedef {Object} Graph
+ * @typedef {Object} Position
+ * @property {number} x
+ * @property {number} y
+ *
+ * @typedef {Object} BoundingBox
+ * @property {Position} [position={ x: 0, y: 0 }]
+ * @property {Size} [size={ width: 0, height: 0 }]
+ *
+ * @typedef {BoundingBox & import("./components/Node.js").NodeInfo} Node
+ * @typedef {BoundingBox & import("./components/Edge.js").EdgeInfo} Edge
+ *
+ * @typedef {object} Graph
+ * @property {Map<string, Node>} nodes
+ * @property {Map<string, Edge>} edges
  */
-let /**@type {import("types").Graph} */ graph
-// let /**@type {import("../index.js").GraphInfo} */ info
-/**
- * Message handler for the web worker.
- * Initializes the state machine, simulator,
- * and graph data based on the received message.
- * Sends messages back to the main thread with
- * status updates and initialized data.
- */
+let /**@type {Graph} */ graph
+
 onmessage = ({ data: { type, params } }) => {
   switch (type) {
     case "GRAPH.IDLE":
@@ -34,7 +42,6 @@ onmessage = ({ data: { type, params } }) => {
         machine: machine,
         state: machine.getInitialState(null),
       }).start()
-
       simulator.onTransition((state, transition) => {
         console.log(state, transition)
       })
@@ -43,6 +50,8 @@ onmessage = ({ data: { type, params } }) => {
     case "GRAPH.BOUNDED":
       console.log("[worker]", type, params)
       const /** @type {import("types").GraphSize}}*/ { edges, nodes } = params
+      console.log(nodes)
+
       for (let [id, size] of nodes) {
         graph.nodes.get(id).size = size
       }

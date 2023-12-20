@@ -21,28 +21,32 @@ export function convertToGraph(machine) {
   const /**@type {import("types").Edges} */ edges = new Map()
   const /**@type {import("types").Nodes} */ nodes = new Map()
 
+  let nodeCounter = 0
+  let edgeCounter = 0
   /** Generates a directed graph representation of a state machine or state node.
    * @typedef {MachineJSON | import("types").AnyStateNodeDefinition} StateNode
    * @param {StateNode} stateNode - The state machine or state node.
    * @param {string | undefined}  parentID - StateNode parent id
    */
   function toDirectedGraph(stateNode, parentID) {
-    const nodeID = stateNode.id
+    const nodePath = stateNode.id
+    nodeCounter++
     flatten(
       stateNode.transitions.map((transition, transitionIndex) =>
-        (transition.target || [nodeID]).map((target, idx) => {
-          const edgeID = `${nodeID}:${transitionIndex}:${idx}`
+        (transition.target || [nodePath]).map((target, idx) => {
+          edgeCounter++
+          const id = "edge-" + String(edgeCounter).padStart(4, "0")
           // console.log(transition) // TODO: actions
-          info.edges.set(edgeID, {
-            id: edgeID,
+          info.edges.set(id, {
             type: transition.eventType,
             cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
             label: transition.eventType, //TODO: label
           })
-          edges.set(edgeID, {
+          edges.set(id, {
+            path: `${nodePath}:${transitionIndex}:${idx}`,
             type: transition.eventType,
             cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
-            source: nodeID,
+            source: nodePath,
             target: String(target).replace(/^#/, ""),
             sections: [],
             label: transition.eventType,
@@ -52,15 +56,16 @@ export function convertToGraph(machine) {
         })
       )
     )
-    info.nodes.set(nodeID, {
-      id: nodeID,
+    const id = "node-" + String(nodeCounter).padStart(4, "0")
+    info.nodes.set(id, {
       type: stateNode.type,
       key: stateNode.key,
       entry: stateNode.entry.map((entry) => entry.type),
       exit: stateNode.exit.map((exit) => exit.type),
       invoke: stateNode.invoke.map((invoke) => (typeof invoke.src === "object" ? invoke.src.type : invoke.src)),
     })
-    nodes.set(nodeID, {
+    nodes.set(id, {
+      path: nodePath,
       order: stateNode.order,
       tags: stateNode.tags,
       history: stateNode.history,
@@ -77,7 +82,7 @@ export function convertToGraph(machine) {
       size: { width: 0, height: 0 },
       position: { x: 0, y: 0 },
     })
-    Object.values(stateNode.states).map((state) => toDirectedGraph(state, nodeID))
+    Object.values(stateNode.states).map((state) => toDirectedGraph(state, nodePath))
   }
   toDirectedGraph(machine, undefined)
   return { relation: { edges, nodes }, info }

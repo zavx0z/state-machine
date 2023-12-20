@@ -34,12 +34,12 @@ class StateMachine extends HTMLElement {
           const container = document.createElement("template")
           for (const [id, node] of nodes) {
             const template = document.createElement("template")
-            template.innerHTML = Node({ id, ...node })
+            template.innerHTML = Node({ ...node, id })
             container.content.append(template.content)
           }
           for (const [id, edge] of edges) {
             const template = document.createElement("template")
-            template.innerHTML = Edge({ id, ...edge })
+            template.innerHTML = Edge({ ...edge, id })
             const element = template.content.firstElementChild
             element.addEventListener("click", () =>
               worker.postMessage({ type: "MACHINE.EVENT", event: { type: edge.type } })

@@ -1,7 +1,6 @@
 const html = String.raw
 /** NodeInfo visualization data
  * @typedef {Object} NodeInfo
- * @property {string} id - node id
  * @property {string} key - node key
  * @property {string} type - node type
  * @property {string[]} entry - node entry actions
@@ -11,7 +10,7 @@ const html = String.raw
 
 /**
  * State visualization component
- * @param { NodeInfo } property
+ * @param { NodeInfo & {id:string} } property
  * @returns {string} html string
  */
 export default ({ id, entry, exit, invoke, key, type }) => {
