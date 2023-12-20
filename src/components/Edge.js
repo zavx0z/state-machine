@@ -1,10 +1,15 @@
+/**EdgeInfo
+ * @typedef {Object} EdgeInfo
+ * @property {string} id - edge id
+ * @property {string} type - edge type
+ * @property {string} [label] - edge label
+ * @property {string} [cond] - edge condition
+ */
+
 /**Transition visualization component
- * @param {Object} property - Property object
- * @param {string} property.id - Edge ID
- * @param {string | undefined} property.cond - Сondition
- * @param {string} property.type - Event type
+ * @param {EdgeInfo} props - Property object
  * @returns {string} */
-export default ({ cond, id, type }) => /*html*/ `
+export default ({ id, type, label, cond }) => /*html*/ `
 <div class="edge" id="${id}" data-active="false" data-preview="false">
   <div class="edge-label" data-cond="${Boolean(cond)}">
     ${(() => {

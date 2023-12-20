@@ -1,7 +1,17 @@
 import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 import { convertToGraph } from "./utils/directedGraph.js"
 import { createSimulator } from "./simulator.js"
+/**
+ * @typedef {Object} Node
+ * @extends import("../index.js").NodeInfo
+ *
+ * @typedef {Object} Edge
+ * @extends import("../index.js").EdgeInfo
+ *
+ * @typedef {Object} Graph
+ */
 let /**@type {import("types").Graph} */ graph
+// let /**@type {import("../index.js").GraphInfo} */ info
 /**
  * Message handler for the web worker.
  * Initializes the state machine, simulator,
@@ -15,9 +25,9 @@ onmessage = ({ data: { type, params } }) => {
       postMessage({ type: "WORKER.LOADED" })
       const /**@type {import("types").MachineJSON} */ machineObj = JSON.parse(params)
       machineObj["predictableActionArguments"] = true // TODO: predictableActionArguments set default true
-
-      graph = convertToGraph(machineObj)
-      postMessage({ type: "GRAPH.BOUNDING", params: graph })
+      const { relation, info } = convertToGraph(machineObj)
+      graph = info
+      postMessage({ type: "GRAPH.RENDER", params: info })
 
       const machine = createMachine(machineObj)
       const simulator = createSimulator({

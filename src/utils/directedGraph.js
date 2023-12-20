@@ -11,9 +11,13 @@ const flatten = (array) => Array.prototype.concat.apply([], array)
 
 /** Converts a state machine or state node to a graph representation.
  * @param {MachineJSON} machine - The state machine to convert.
- * @returns {import("types").Graph} - Ноды и грани
+ * @returns {{relation:import("types").Graph, info: import("../../index.js").GraphInfo}} - Ноды и грани
  */
 export function convertToGraph(machine) {
+  const /**@type {import("../../index.js").GraphInfo} */ info = {
+      edges: new Map(),
+      nodes: new Map(),
+    }
   const /**@type {import("types").Edges} */ edges = new Map()
   const /**@type {import("types").Nodes} */ nodes = new Map()
 
@@ -29,6 +33,12 @@ export function convertToGraph(machine) {
         (transition.target || [nodeID]).map((target, idx) => {
           const edgeID = `${nodeID}:${transitionIndex}:${idx}`
           // console.log(transition) // TODO: actions
+          info.edges.set(edgeID, {
+            id: edgeID,
+            type: transition.eventType,
+            cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
+            label: transition.eventType, //TODO: label
+          })
           edges.set(edgeID, {
             type: transition.eventType,
             cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
@@ -42,6 +52,14 @@ export function convertToGraph(machine) {
         })
       )
     )
+    info.nodes.set(nodeID, {
+      id: nodeID,
+      type: stateNode.type,
+      key: stateNode.key,
+      entry: stateNode.entry.map((entry) => entry.type),
+      exit: stateNode.exit.map((exit) => exit.type),
+      invoke: stateNode.invoke.map((invoke) => (typeof invoke.src === "object" ? invoke.src.type : invoke.src)),
+    })
     nodes.set(nodeID, {
       order: stateNode.order,
       tags: stateNode.tags,
@@ -62,5 +80,5 @@ export function convertToGraph(machine) {
     Object.values(stateNode.states).map((state) => toDirectedGraph(state, nodeID))
   }
   toDirectedGraph(machine, undefined)
-  return { edges, nodes }
+  return { relation: { edges, nodes }, info }
 }

@@ -1,13 +1,17 @@
 const html = String.raw
+/** NodeInfo visualization data
+ * @typedef {Object} NodeInfo
+ * @property {string} id - node id
+ * @property {string} key - node key
+ * @property {string} type - node type
+ * @property {string[]} entry - node entry actions
+ * @property {string[]} exit - node exit actions
+ * @property {string[]} invoke - node invoke services
+ */
+
 /**
- * NodeState visualization component
- * @param { Object } property
- * @param {string} property.id
- * @param {string} property.key
- * @param {string} property.type
- * @param {string[]} property.entry
- * @param {string[]} property.exit
- * @param {string[]} property.invoke
+ * State visualization component
+ * @param { NodeInfo } property
  * @returns {string} html string
  */
 export default ({ id, entry, exit, invoke, key, type }) => {

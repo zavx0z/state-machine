@@ -1,7 +1,12 @@
+/** Data received from the worker.
+ * @typedef {Object} GraphInfo - GRAPH.RENDER
+ * @property {Map<string, import("./src/components/Node.js").NodeInfo>} nodes - Node data.
+ * @property {Map<string, import("./src/components/Edge.js").EdgeInfo>} edges - Edge data.
+ */
+
 import { toMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 import Node from "./src/components/Node.js"
 import Edge from "./src/components/Edge.js"
-
 const template = document.createElement("template")
 template.innerHTML = String.raw`
 <link rel="stylesheet" href="./src/styles.css" type="text/css">
@@ -24,8 +29,8 @@ class StateMachine extends HTMLElement {
       })
     worker.onmessage = ({ data: { type, params } }) => {
       switch (type) {
-        case "GRAPH.BOUNDING":
-          const /** @type {import("types").Graph}}*/ { edges, nodes } = params
+        case "GRAPH.RENDER":
+          const /** @type {GraphInfo}*/ { edges, nodes } = params
           const container = document.createElement("template")
           for (const [id, node] of nodes) {
             const template = document.createElement("template")
@@ -46,7 +51,8 @@ class StateMachine extends HTMLElement {
             container.content.append(template.content)
           }
           // Get size information for each node and edge element and send it to the worker thread
-          const observer = new MutationObserver(() => {
+          const observer = new MutationObserver((m) => {
+            console.log(m)
             const /** @type {import("types").GraphSize}}*/ graphSize = { nodes: new Map(), edges: new Map() }
             for (let element of shadowRoot.children) {
               switch (element.className) {
