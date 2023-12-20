@@ -14,8 +14,8 @@ const flatten = (array) => Array.prototype.concat.apply([], array)
  * @returns {import("types").Graph} - Ноды и грани
  */
 export function convertToGraph(machine) {
-  const /**@type {import("types").EdgesTransition} */ edges = new Map()
-  const /**@type {import("types").NodesState} */ nodes = new Map()
+  const /**@type {import("types").Edges} */ edges = new Map()
+  const /**@type {import("types").Nodes} */ nodes = new Map()
 
   /** Generates a directed graph representation of a state machine or state node.
    * @typedef {MachineJSON | import("types").AnyStateNodeDefinition} StateNode
@@ -35,13 +35,9 @@ export function convertToGraph(machine) {
             source: nodeID,
             target: String(target).replace(/^#/, ""),
             sections: [],
-            label: {
-              text: transition.eventType,
-              x: 0,
-              y: 0,
-              width: 0,
-              height: 0,
-            },
+            label: transition.eventType,
+            size: { width: 0, height: 0 },
+            position: { x: 0, y: 0 },
           })
         })
       )
@@ -60,14 +56,8 @@ export function convertToGraph(machine) {
       exit: stateNode.exit.map((exit) => exit.type),
       invoke: stateNode.invoke.map((invoke) => (typeof invoke.src === "object" ? invoke.src.type : invoke.src)),
       parent: parentID,
-      meta: {
-        layout: {
-          width: 0,
-          height: 0,
-          x: 0,
-          y: 0,
-        },
-      },
+      size: { width: 0, height: 0 },
+      position: { x: 0, y: 0 },
     })
     Object.values(stateNode.states).map((state) => toDirectedGraph(state, nodeID))
   }

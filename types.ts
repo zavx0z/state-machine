@@ -7,9 +7,11 @@ import type {
   Interpreter,
 } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 export type MachineJSON = StateNodeDefinition<any, any, any> & { transition: string[] }
-type GraphLayout = { width: number; height: number; x: number; y: number }
-export type NodesState = Map<string, NodeState>
-export type NodeState = {
+
+type Size = { width: number; height: number }
+export type Point = { x: number; y: number }
+
+export type Node = {
   entry: string[]
   exit: string[]
   invoke: string[]
@@ -17,33 +19,28 @@ export type NodeState = {
   initial: string | number | symbol | undefined
   key: string
   type: string
-  meta: {
-    layout: GraphLayout
-  }
   order: number
   parent: string | undefined
   tags: string[]
   children: string[]
+  size: Size
+  position: Point
 }
-export type EdgesTransition = Map<string, EdgeTransition>
-export type EdgeTransition = {
+export type Edge = {
   source: string
   target: string
-  label: GraphLayout & { text: string }
+  label: string
   type: string
   cond: string | undefined
   sections: ElkEdgeSection[]
+  size: Size
+  position: Point
 }
-export type Graph = {
-  nodes: NodesState
-  edges: EdgesTransition
-}
-export type GraphBounded = {
-  nodes: Map<string, { width: number; height: number }>
-  edges: Map<string, { width: number; height: number }>
-}
+export type Nodes = Map<string, Node>
+export type Edges = Map<string, Edge>
+export type Graph = { nodes: Nodes; edges: Edges }
+export type GraphSize = { nodes: Map<string, Size>; edges: Map<string, Size> }
 
-export type Point = { x: number; y: number }
 export type SubscribeCallback = (state: AnyState, event: AnyEventObject) => void
 export type RelativeNodeEdgeMap = [Map<string | undefined, string[]>, Map<string, string | undefined>]
 

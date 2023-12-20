@@ -29,7 +29,7 @@ class StateMachine extends HTMLElement {
           const container = document.createElement("template")
           for (const [id, node] of nodes) {
             const template = document.createElement("template")
-            template.innerHTML = Node({ ...node, id })
+            template.innerHTML = Node({ id, ...node })
             container.content.append(template.content)
           }
           for (const [id, edge] of edges) {
@@ -45,22 +45,22 @@ class StateMachine extends HTMLElement {
             element.addEventListener("mouseleave", () => worker.postMessage({ type: "PREVIEW.CLEAR" }))
             container.content.append(template.content)
           }
-          // Get bounding box information for each node and edge element and send it to the worker thread
+          // Get size information for each node and edge element and send it to the worker thread
           const observer = new MutationObserver(() => {
-            const /** @type {import("types").GraphBounded}}*/ boundingBoxes = { nodes: new Map(), edges: new Map() }
+            const /** @type {import("types").GraphSize}}*/ graphSize = { nodes: new Map(), edges: new Map() }
             for (let element of shadowRoot.children) {
               switch (element.className) {
                 case "node":
                 case "edge":
                   const { width, height } = element.getBoundingClientRect()
-                  boundingBoxes[`${element.className}s`].set(element.id, { width, height })
+                  graphSize[`${element.className}s`].set(element.id, { width, height })
                   break
                 default:
                   break
               }
             }
             observer.disconnect()
-            worker.postMessage({ type: "GRAPH.BOUNDED", params: boundingBoxes })
+            worker.postMessage({ type: "GRAPH.BOUNDED", params: graphSize })
           })
           observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: false })
           shadowRoot.append(container.content)

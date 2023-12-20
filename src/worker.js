@@ -32,17 +32,14 @@ onmessage = ({ data: { type, params } }) => {
       break
     case "GRAPH.BOUNDED":
       console.log("[worker]", type, params)
-      const /** @type {import("types").GraphBounded}}*/ { edges, nodes } = params
-      for (let [id, bb] of nodes) {
-        const node = graph.nodes.get(id)
-        node.meta.layout.height = bb.height
-        node.meta.layout.width = bb.width
+      const /** @type {import("types").GraphSize}}*/ { edges, nodes } = params
+      for (let [id, size] of nodes) {
+        graph.nodes.get(id).size = size
       }
-      for (let [id, bb] of edges) {
-        const edge = graph.edges.get(id)
-        edge.label.height = bb.height
-        edge.label.width = bb.width
+      for (let [id, size] of edges) {
+        graph.edges.get(id).size = size
       }
+      console.log(graph)
       break
     default:
       console.log("[worker]", type, params)
