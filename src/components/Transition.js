@@ -6,7 +6,7 @@
  * @returns {string} */
 export default ({ cond, edgeID, eventType }) => /*html*/ `
 <div class="transition" id="${edgeID}" data-active="false" data-preview="false">
-  <div class="transition-label" data-cond="${cond}">
+  <div class="transition-label" data-cond="${Boolean(cond)}">
     ${(() => {
       if (eventType.startsWith("done.state.")) {
         return /*html*/ `
@@ -19,7 +19,7 @@ export default ({ cond, edgeID, eventType }) => /*html*/ `
           const matchInvoc = match[1].match(/:invocation\[(\d+)\]$/)
           if (matchInvoc)
             return /*html*/ `
-              <div>
+              <div class="transition-label-invoke transition-label-invoke-done">
                 <em>done: </em>
                 <div>anonymous [${matchInvoc[1]}]</div>
               </div> `
@@ -28,7 +28,7 @@ export default ({ cond, edgeID, eventType }) => /*html*/ `
         const match = eventType.match(/^error\.platform\.(.+)$/)
         if (match)
           return /*html*/ `
-            <div>
+            <div class="transition-label-invoke transition-label-invoke-error">
               <em>error: </em>
               <div>${match[1]}</div>
             </div> `
