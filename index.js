@@ -15,7 +15,7 @@ class StateMachine extends HTMLElement {
     const worker = new Worker("./src/worker.js", { type: "module" })
     worker.onmessage = ({ data: { type, params } }) => {
       switch (type) {
-        case "machine.init":
+        case "GRAPH.BOUNDING":
           /** @type {{edges: import("types").EdgesTransition; nodes: import("types").NodesState}}*/
           const { edges, nodes } = params
 
@@ -29,35 +29,37 @@ class StateMachine extends HTMLElement {
             const template = document.createElement("template")
             template.innerHTML = Edge({ id, ...edge })
             const element = template.content.firstElementChild
-            element.addEventListener("click", () => worker.postMessage({ type: "EVENT", event: { type: edge.type } }))
+            element.addEventListener("click", () =>
+              worker.postMessage({ type: "MACHINE.EVENT", event: { type: edge.type } })
+            )
             element.addEventListener("mouseenter", () =>
-              worker.postMessage({ type: "EVENT.PREVIEW", eventType: edge.type })
+              worker.postMessage({ type: "GRAPH.PREVIEW", eventType: edge.type })
             )
             element.addEventListener("mouseleave", () => worker.postMessage({ type: "PREVIEW.CLEAR" }))
             container.content.append(template.content)
           }
-
+          // Get bounding box information for each node and edge element and send it to the worker thread
           const observer = new MutationObserver(() => {
-            const nodes = shadowRoot.querySelectorAll(".node")
-            const boundingBoxes = {
-              node: new Map(),
-              edge: new Map(),
+            const boundingBoxes = { node: new Map(), edge: new Map() }
+            for (let element of shadowRoot.children) {
+              switch (element.className) {
+                case "node":
+                case "edge":
+                  const { width, height } = element.getBoundingClientRect()
+                  boundingBoxes[element.className].set(element.id, { width, height })
+                  break
+                default:
+                  break
+              }
             }
-            for (let n of shadowRoot.children) {
-              console.log(n.className)
-            }
-            const bb = [...nodes].map((node) => {
-              const { width, height } = node.getBoundingClientRect()
-              return { id: node.id, width, height }
-            })
-            console.log(bb)
             observer.disconnect()
+            worker.postMessage({ type: "GRAPH.BOUNDED", params: boundingBoxes })
           })
-          observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: true })
+          observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: false })
           shadowRoot.append(container.content)
           break
         default:
-          console.log("worker", type)
+          console.log("[shadow]", type, params)
           break
       }
     }
@@ -66,7 +68,7 @@ class StateMachine extends HTMLElement {
       .then((Response) => Response.text())
       .then((xml) => {
         const machine = toMachine(xml, {})
-        worker.postMessage({ type: "init", params: JSON.stringify(machine.toJSON()) })
+        worker.postMessage({ type: "GRAPH.IDLE", params: JSON.stringify(machine.toJSON()) })
         this.machine = interpret(machine)
         this.machine.onTransition((state, event) => this.listeners.forEach((callback) => callback(state, event)))
         this.machine.start()

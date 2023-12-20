@@ -1,7 +1,6 @@
 import type { ElkEdgeSection } from "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/+esm"
 export {}
 import type {
-  TransitionDefinition,
   AnyState,
   StateNodeDefinition,
   AnyEventObject,
