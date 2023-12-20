@@ -1,7 +1,7 @@
 import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 import { convertToGraph } from "./utils/directedGraph.js"
 import { createSimulator } from "./simulator.js"
-
+let /**@type {import("types").Graph} */ graph
 /**
  * Message handler for the web worker.
  * Initializes the state machine, simulator,
@@ -16,8 +16,8 @@ onmessage = ({ data: { type, params } }) => {
       const /**@type {import("types").MachineJSON} */ machineObj = JSON.parse(params)
       machineObj["predictableActionArguments"] = true // TODO: predictableActionArguments set default true
 
-      const { edges, nodes } = convertToGraph(machineObj)
-      postMessage({ type: "GRAPH.BOUNDING", params: { edges, nodes } })
+      graph = convertToGraph(machineObj)
+      postMessage({ type: "GRAPH.BOUNDING", params: graph })
 
       const machine = createMachine(machineObj)
       const simulator = createSimulator({
@@ -32,6 +32,17 @@ onmessage = ({ data: { type, params } }) => {
       break
     case "GRAPH.BOUNDED":
       console.log("[worker]", type, params)
+      const /** @type {import("types").GraphBounded}}*/ { edges, nodes } = params
+      for (let [id, bb] of nodes) {
+        const node = graph.nodes.get(id)
+        node.meta.layout.height = bb.height
+        node.meta.layout.width = bb.width
+      }
+      for (let [id, bb] of edges) {
+        const edge = graph.edges.get(id)
+        edge.label.height = bb.height
+        edge.label.width = bb.width
+      }
       break
     default:
       console.log("[worker]", type, params)

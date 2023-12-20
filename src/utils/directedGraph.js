@@ -11,7 +11,7 @@ const flatten = (array) => Array.prototype.concat.apply([], array)
 
 /** Converts a state machine or state node to a graph representation.
  * @param {MachineJSON} machine - The state machine to convert.
- * @returns {{edges: import("types").EdgesTransition; nodes: import("types").NodesState}} - Ноды и грани
+ * @returns {import("types").Graph} - Ноды и грани
  */
 export function convertToGraph(machine) {
   const /**@type {import("types").EdgesTransition} */ edges = new Map()
@@ -30,7 +30,6 @@ export function convertToGraph(machine) {
           const edgeID = `${nodeID}:${transitionIndex}:${idx}`
           // console.log(transition) // TODO: actions
           edges.set(edgeID, {
-            id: edgeID,
             type: transition.eventType,
             cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
             source: nodeID,
@@ -48,7 +47,6 @@ export function convertToGraph(machine) {
       )
     )
     nodes.set(nodeID, {
-      id: nodeID,
       order: stateNode.order,
       tags: stateNode.tags,
       history: stateNode.history,

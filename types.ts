@@ -1,5 +1,4 @@
 import type { ElkEdgeSection } from "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/+esm"
-export {}
 import type {
   AnyState,
   StateNodeDefinition,
@@ -11,7 +10,6 @@ export type MachineJSON = StateNodeDefinition<any, any, any> & { transition: str
 type GraphLayout = { width: number; height: number; x: number; y: number }
 export type NodesState = Map<string, NodeState>
 export type NodeState = {
-  id: string
   entry: string[]
   exit: string[]
   invoke: string[]
@@ -29,7 +27,6 @@ export type NodeState = {
 }
 export type EdgesTransition = Map<string, EdgeTransition>
 export type EdgeTransition = {
-  id: string
   source: string
   target: string
   label: GraphLayout & { text: string }
@@ -37,6 +34,15 @@ export type EdgeTransition = {
   cond: string | undefined
   sections: ElkEdgeSection[]
 }
+export type Graph = {
+  nodes: NodesState
+  edges: EdgesTransition
+}
+export type GraphBounded = {
+  nodes: Map<string, { width: number; height: number }>
+  edges: Map<string, { width: number; height: number }>
+}
+
 export type Point = { x: number; y: number }
 export type SubscribeCallback = (state: AnyState, event: AnyEventObject) => void
 export type RelativeNodeEdgeMap = [Map<string | undefined, string[]>, Map<string, string | undefined>]

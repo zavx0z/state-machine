@@ -13,12 +13,19 @@ class StateMachine extends HTMLElement {
     shadowRoot.appendChild(template.content.cloneNode(true))
 
     const worker = new Worker("./src/worker.js", { type: "module" })
+    fetch(this.getAttribute("src"))
+      .then((Response) => Response.text())
+      .then((xml) => {
+        const machine = toMachine(xml, {})
+        worker.postMessage({ type: "GRAPH.IDLE", params: JSON.stringify(machine.toJSON()) })
+        this.machine = interpret(machine)
+        this.machine.onTransition((state, event) => this.listeners.forEach((callback) => callback(state, event)))
+        this.machine.start()
+      })
     worker.onmessage = ({ data: { type, params } }) => {
       switch (type) {
         case "GRAPH.BOUNDING":
-          /** @type {{edges: import("types").EdgesTransition; nodes: import("types").NodesState}}*/
-          const { edges, nodes } = params
-
+          const /** @type {import("types").Graph}}*/ { edges, nodes } = params
           const container = document.createElement("template")
           for (const [id, node] of nodes) {
             const template = document.createElement("template")
@@ -40,13 +47,13 @@ class StateMachine extends HTMLElement {
           }
           // Get bounding box information for each node and edge element and send it to the worker thread
           const observer = new MutationObserver(() => {
-            const boundingBoxes = { node: new Map(), edge: new Map() }
+            const /** @type {import("types").GraphBounded}}*/ boundingBoxes = { nodes: new Map(), edges: new Map() }
             for (let element of shadowRoot.children) {
               switch (element.className) {
                 case "node":
                 case "edge":
                   const { width, height } = element.getBoundingClientRect()
-                  boundingBoxes[element.className].set(element.id, { width, height })
+                  boundingBoxes[`${element.className}s`].set(element.id, { width, height })
                   break
                 default:
                   break
@@ -63,16 +70,6 @@ class StateMachine extends HTMLElement {
           break
       }
     }
-
-    fetch(this.getAttribute("src"))
-      .then((Response) => Response.text())
-      .then((xml) => {
-        const machine = toMachine(xml, {})
-        worker.postMessage({ type: "GRAPH.IDLE", params: JSON.stringify(machine.toJSON()) })
-        this.machine = interpret(machine)
-        this.machine.onTransition((state, event) => this.listeners.forEach((callback) => callback(state, event)))
-        this.machine.start()
-      })
   }
   connectedCallback() {}
 
