@@ -1,6 +1,6 @@
 import { toMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
-import State from "./src/components/State.js"
-import Transition from "./src/components/Transition.js"
+import Node from "./src/components/Node.js"
+import Edge from "./src/components/Edge.js"
 
 const template = document.createElement("template")
 template.innerHTML = String.raw`
@@ -18,42 +18,43 @@ class StateMachine extends HTMLElement {
         case "machine.init":
           /** @type {{edges: import("types").EdgesTransition; nodes: import("types").NodesState}}*/
           const { edges, nodes } = params
-          let nodesElements = ""
+
+          const container = document.createElement("template")
           for (const [id, node] of nodes) {
-            nodesElements += State({ node })
+            const template = document.createElement("template")
+            template.innerHTML = Node({ ...node, id })
+            container.content.append(template.content)
           }
-          const containerNodes = document.createElement("div")
-          containerNodes.innerHTML = nodesElements
-
-          const observer = new MutationObserver(function (mutations) {
-            if (shadowRoot.contains(containerNodes)) {
-              const bb = [...containerNodes.children].map((node) => {
-                const { width, height } = node.getBoundingClientRect()
-                return { id: node.id, width, height }
-              })
-              console.log(bb)
-              observer.disconnect()
-            }
-          })
-          observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: true })
-          // shadowRoot.append(containerNodes)
-
-          const containerTransitions = document.createElement("div")
           for (const [id, edge] of edges) {
             const template = document.createElement("template")
-            template.innerHTML = Transition({
-              edgeID: id,
-              cond: edge.transition.cond?.name,
-              eventType: edge.transition.eventType,
-            })
-            template.onclick = () => worker.postMessage({ type: "EVENT", event: { type: edge.transition.eventType } })
-            template.onmouseenter = () =>
-              worker.postMessage({ type: "EVENT.PREVIEW", eventType: edge.transition.eventType })
-            template.onmouseleave = () => worker.postMessage({ type: "PREVIEW.CLEAR" })
-            containerTransitions.append(template.content)
+            template.innerHTML = Edge({ id, ...edge })
+            const element = template.content.firstElementChild
+            element.addEventListener("click", () => worker.postMessage({ type: "EVENT", event: { type: edge.type } }))
+            element.addEventListener("mouseenter", () =>
+              worker.postMessage({ type: "EVENT.PREVIEW", eventType: edge.type })
+            )
+            element.addEventListener("mouseleave", () => worker.postMessage({ type: "PREVIEW.CLEAR" }))
+            container.content.append(template.content)
           }
-          shadowRoot.append(containerTransitions)
 
+          const observer = new MutationObserver(() => {
+            const nodes = shadowRoot.querySelectorAll(".node")
+            const boundingBoxes = {
+              node: new Map(),
+              edge: new Map(),
+            }
+            for (let n of shadowRoot.children) {
+              console.log(n.className)
+            }
+            const bb = [...nodes].map((node) => {
+              const { width, height } = node.getBoundingClientRect()
+              return { id: node.id, width, height }
+            })
+            console.log(bb)
+            observer.disconnect()
+          })
+          observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: true })
+          shadowRoot.append(container.content)
           break
         default:
           console.log("worker", type)
@@ -65,12 +66,14 @@ class StateMachine extends HTMLElement {
       .then((Response) => Response.text())
       .then((xml) => {
         const machine = toMachine(xml, {})
-        worker.postMessage(JSON.stringify(machine.toJSON()))
+        worker.postMessage({ type: "init", params: JSON.stringify(machine.toJSON()) })
         this.machine = interpret(machine)
         this.machine.onTransition((state, event) => this.listeners.forEach((callback) => callback(state, event)))
         this.machine.start()
       })
   }
+  connectedCallback() {}
+
   /** @type {import("types").SubscribeCallback[]} */
   listeners = []
   /** Подписка на события машины
@@ -84,9 +87,6 @@ class StateMachine extends HTMLElement {
   send({ type, params }) {
     this.machine.send({ type, params })
   }
-
-  connectedCallback() {}
-
   render() {}
 }
 customElements.define("state-machine", StateMachine)

@@ -34,7 +34,8 @@ export type EdgeTransition = {
   source: string
   target: string
   label: GraphLayout & { text: string }
-  transition: TransitionDefinition<any, any>
+  type: string
+  cond: string | undefined
   sections: ElkEdgeSection[]
 }
 export type Point = { x: number; y: number }

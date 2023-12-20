@@ -28,9 +28,11 @@ export function convertToGraph(machine) {
       stateNode.transitions.map((transition, transitionIndex) =>
         (transition.target || [nodeID]).map((target, idx) => {
           const edgeID = `${nodeID}:${transitionIndex}:${idx}`
+          // console.log(transition) // TODO: actions
           edges.set(edgeID, {
             id: edgeID,
-            transition,
+            type: transition.eventType,
+            cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
             source: nodeID,
             target: String(target).replace(/^#/, ""),
             sections: [],

@@ -80,7 +80,7 @@
   text-transform: uppercase;
   opacity: 0.5;
 }
-.transition {
+.edge {
   position: fixed;
   z-index: 40;
   display: flex;
@@ -99,25 +99,25 @@
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
-.transition[data-active="true"] {
+.edge[data-active="true"] {
   border-color: rgb(var(--primary-500) / var(--border-opacity, 1));
   color: rgb(var(--surface-500) / var(--text-opacity, 1));
 }
-.transition-label {
+.edge-label {
   background-color: rgb(var(--tertiary-900) / var(--bg-opacity, 1));
   padding: 0.25rem /* 4px */ 0.5rem /* 8px */;
 }
-.transition-label[data-active="true"] {
+.edge-label[data-active="true"] {
   background-color: rgb(var(--primary-500) / var(--bg-opacity, 1));
 }
-.transition-label[data-cond="true"] {
+.edge-label[data-cond="true"] {
   border-top-left-radius: 1rem /* 16px */;
   border-bottom-left-radius: 1rem /* 16px */;
 }
-.transition-label[data-cond="false"] {
+.edge-label[data-cond="false"] {
   border-radius: 1rem /* 16px */;
 }
-.transition-label-invoke {
+.edge-label-invoke {
   display: flex;
   align-items: center;
   justify-content: start;
@@ -126,25 +126,25 @@
   white-space: nowrap;
 }
 
-.transition-label-invoke::before {
+.edge-label-invoke::before {
   content: "";
   border-radius: 0.375rem /* 6px */;
   display: block;
   width: 0.5rem /* 8px */;
   height: 0.5rem /* 8px */;
 }
-.transition-label-invoke-done::before {
+.edge-label-invoke-done::before {
   background-color: rgb(var(--success-500) / var(--bg-opacity, 1));
 }
-.transition-label-invoke-error::before {
+.edge-label-invoke-error::before {
   background-color: rgb(var(--error-500) / var(--bg-opacity, 1));
 }
-.transition-cond {
+.edge-cond {
   padding: 0 0.5rem /* 8px */;
 }
-.transition-cond::before {
+.edge-cond::before {
   content: "[";
 }
-.transition-cond::after {
+.edge-cond::after {
   content: "]";
 }
