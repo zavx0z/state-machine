@@ -1,5 +1,6 @@
 import { toMachine, interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 import State from "./src/components/State.js"
+import Transition from "./src/components/Transition.js"
 
 const template = document.createElement("template")
 template.innerHTML = String.raw`
@@ -19,7 +20,6 @@ class StateMachine extends HTMLElement {
           const { edges, nodes } = params
           let nodesElements = ""
           for (const [id, node] of nodes) {
-            console.log(`${id}: ${node.type}`)
             nodesElements += State({ node })
           }
           const containerNodes = document.createElement("div")
@@ -36,7 +36,24 @@ class StateMachine extends HTMLElement {
             }
           })
           observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: true })
-          shadowRoot.append(containerNodes)
+          // shadowRoot.append(containerNodes)
+
+          const containerTransitions = document.createElement("div")
+          for (const [id, edge] of edges) {
+            const template = document.createElement("template")
+            template.innerHTML = Transition({
+              edgeID: id,
+              cond: edge.transition.cond?.name,
+              eventType: edge.transition.eventType,
+            })
+            template.onclick = () => worker.postMessage({ type: "EVENT", event: { type: edge.transition.eventType } })
+            template.onmouseenter = () =>
+              worker.postMessage({ type: "EVENT.PREVIEW", eventType: edge.transition.eventType })
+            template.onmouseleave = () => worker.postMessage({ type: "PREVIEW.CLEAR" })
+            containerTransitions.append(template.content)
+          }
+          shadowRoot.append(containerTransitions)
+
           break
         default:
           console.log("worker", type)

@@ -1,8 +1,6 @@
 const html = String.raw
-
 /**
  * NodeState visualization component
- *
  * @param { Object } property
  * @param {import("types").NodeState } property.node
  * @returns {string} html string
@@ -17,13 +15,13 @@ export default ({ node }) => {
           <div class="node-title">${node.key}</div>
         </div>
         ${node.invoke.length
-          ? html`<div class="node-fn" data-type="invoke">${node.invoke.map((item) => html`<div>${item}</div>`)}</div>`
+          ? html`<div class="node-actions" data-type="invoke">${node.invoke.map((item) => html`<div>${item}</div>`)}</div>`
           : ""}
         ${node.entry.length
-          ? html`<div class="node-fn" data-type="entry">${node.entry.map((item) => html`<div>${item}</div>`)}</div>`
+          ? html`<div class="node-actions" data-type="entry">${node.entry.map((item) => html`<div>${item}</div>`)}</div>`
           : ""}
         ${node.exit.length
-          ? html`<div class="node-fn" data-type="exit">${node.exit.map((item) => html`<div>${item}</div>`)}</div>`
+          ? html`<div class="node-actions" data-type="exit">${node.exit.map((item) => html`<div>${item}</div>`)}</div>`
           : ""}
       </div>
     </div>
