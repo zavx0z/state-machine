@@ -6,6 +6,7 @@ const html = String.raw
  * @property {string[]} entry - node entry actions
  * @property {string[]} exit - node exit actions
  * @property {string[]} invoke - node invoke services
+ * @property {string[]} [tags] - node tags
  */
 
 /**

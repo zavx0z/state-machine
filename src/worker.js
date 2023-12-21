@@ -1,5 +1,5 @@
 import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
-import { convertToGraph } from "./actions/parse.js"
+import { representation } from "./actions/repr.js"
 import { createSimulator } from "./simulator.js"
 /**
  * @typedef {Object} Size
@@ -27,15 +27,17 @@ import { createSimulator } from "./simulator.js"
  */
 let /**@type {Graph} */ graph
 
+const /**@type {import("../index.js").GraphInfo}*/ GraphInfo = { edges: new Map(), nodes: new Map() }
+const /**@type {import("./actions/relation.js").GraphRelation}*/ GraphRelation = { edges: new Map(), nodes: new Map() }
 onmessage = ({ data: { type, params } }) => {
   switch (type) {
-    case "GRAPH.IDLE":
+    case "DOM.IDLE":
       postMessage({ type: "WORKER.LOADED" })
-      const /**@type {import("./actions/parse.js").MachineJSON} */ machineObj = JSON.parse(params)
+      const /**@type {import("./actions/repr.js").Machine} */ machineObj = JSON.parse(params)
       machineObj["predictableActionArguments"] = true // TODO: predictableActionArguments set default true
-      const { relation, info } = convertToGraph(machineObj)
-      graph = info
-      postMessage({ type: "GRAPH.RENDER", params: info })
+
+      representation(machineObj, GraphInfo, GraphRelation)
+      postMessage({ type: "DOM.RENDER", params: GraphInfo })
 
       const machine = createMachine(machineObj)
       const simulator = createSimulator({
@@ -47,18 +49,18 @@ onmessage = ({ data: { type, params } }) => {
       })
       // simulator.send({ type: "PREVIEW.CLEAR" })
       break
-    case "GRAPH.BOUNDED":
+    case "DOM.BOUNDED":
       console.log("[worker]", type, params)
       const /** @type {import("types").GraphSize}}*/ { edges, nodes } = params
-      console.log(nodes)
+      // console.log(params)
 
-      for (let [id, size] of nodes) {
-        graph.nodes.get(id).size = size
-      }
-      for (let [id, size] of edges) {
-        graph.edges.get(id).size = size
-      }
-      console.log(graph)
+      // for (let [id, size] of nodes) {
+      //   graph.nodes.get(id).size = size
+      // }
+      // for (let [id, size] of edges) {
+      //   graph.edges.get(id).size = size
+      // }
+      // console.log(graph)
       break
     default:
       console.log("[worker]", type, params)

@@ -12,24 +12,24 @@ template.innerHTML = String.raw`
 <link rel="stylesheet" href="./src/styles.css" type="text/css">
 `
 class StateMachine extends HTMLElement {
+  #shadowRoot = this.attachShadow({ mode: "closed" })
   constructor() {
     super()
-    const shadowRoot = this.attachShadow({ mode: "closed" })
-    shadowRoot.appendChild(template.content.cloneNode(true))
+    this.#shadowRoot.appendChild(template.content.cloneNode(true))
 
     const worker = new Worker("./src/worker.js", { type: "module" })
     fetch(this.getAttribute("src"))
       .then((Response) => Response.text())
       .then((xml) => {
         const machine = toMachine(xml, {})
-        worker.postMessage({ type: "GRAPH.IDLE", params: JSON.stringify(machine.toJSON()) })
+        worker.postMessage({ type: "DOM.IDLE", params: JSON.stringify(machine.toJSON()) })
         this.machine = interpret(machine)
         this.machine.onTransition((state, event) => this.listeners.forEach((callback) => callback(state, event)))
         this.machine.start()
       })
     worker.onmessage = ({ data: { type, params } }) => {
       switch (type) {
-        case "GRAPH.RENDER":
+        case "DOM.RENDER":
           const /** @type {GraphInfo}*/ { edges, nodes } = params
           const container = document.createElement("template")
           for (const [id, node] of nodes) {
@@ -45,16 +45,15 @@ class StateMachine extends HTMLElement {
               worker.postMessage({ type: "MACHINE.EVENT", event: { type: edge.type } })
             )
             element.addEventListener("mouseenter", () =>
-              worker.postMessage({ type: "GRAPH.PREVIEW", eventType: edge.type })
+              worker.postMessage({ type: "SIMULATOR.PREVIEW", eventType: edge.type })
             )
-            element.addEventListener("mouseleave", () => worker.postMessage({ type: "PREVIEW.CLEAR" }))
+            element.addEventListener("mouseleave", () => worker.postMessage({ type: "SIMULATOR.PREVIEW.CLEAR" }))
             container.content.append(template.content)
           }
           // Get size information for each node and edge element and send it to the worker thread
-          const observer = new MutationObserver((m) => {
-            console.log(m)
+          const observer = new MutationObserver(() => {
             const /** @type {import("types").GraphSize}}*/ graphSize = { nodes: new Map(), edges: new Map() }
-            for (let element of shadowRoot.children) {
+            for (let element of this.#shadowRoot.children) {
               switch (element.className) {
                 case "node":
                 case "edge":
@@ -66,10 +65,15 @@ class StateMachine extends HTMLElement {
               }
             }
             observer.disconnect()
-            worker.postMessage({ type: "GRAPH.BOUNDED", params: graphSize })
+            worker.postMessage({ type: "DOM.BOUNDED", params: graphSize })
           })
-          observer.observe(shadowRoot, { attributes: false, childList: true, characterData: false, subtree: false })
-          shadowRoot.append(container.content)
+          observer.observe(this.#shadowRoot, {
+            attributes: false,
+            childList: true,
+            characterData: false,
+            subtree: false,
+          })
+          this.#shadowRoot.append(container.content)
           break
         default:
           console.log("[shadow]", type, params)
@@ -77,7 +81,9 @@ class StateMachine extends HTMLElement {
       }
     }
   }
-  connectedCallback() {}
+  connectedCallback() {
+    
+  }
 
   /** @type {import("types").SubscribeCallback[]} */
   listeners = []
