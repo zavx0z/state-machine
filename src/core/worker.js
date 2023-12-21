@@ -18,11 +18,19 @@ import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk-api.min.js"
  * @property {number} y
  *
  * @typedef {Object} BoundingBox
- * @property {Position} [position={ x: 0, y: 0 }]
  * @property {Size} size
+ * @property {Position} [position={ x: 0, y: 0 }]
+
+ * @typedef {Object} EdgeBoundingBox
+ * @property {Size} size
+ * @property {Position} [position={ x: 0, y: 0 }]
+ * @property {import("elkjs").ElkEdgeSection[]} [sections]
+ * 
+ * @typedef {{ edges:Map<string, EdgeBoundingBox>, nodes: Map<string, BoundingBox>}} GraphBounding
+ * 
  */
 // @ts-ignore
-const elk  = new ELK({ workerUrl: "/src/utils/elk-worker.min.js" })
+const elk = new ELK({ workerUrl: "/src/utils/elk-worker.min.js" })
 
 /** Data structure for graph visualization @type {import("../index.js").GraphInfo} */
 const GraphInfo = { edges: new Map(), nodes: new Map() }
@@ -30,7 +38,7 @@ const GraphInfo = { edges: new Map(), nodes: new Map() }
 /** Relation structure Machine @type {import("../actions/relation.js").MachineRelation}*/
 const MachineRelation = { edges: new Map(), nodes: new Map() }
 
-/** Graph bounding box @type { { edges:Map<string, BoundingBox>, nodes: Map<string,BoundingBox>} } */
+/** Graph bounding box @type {GraphBounding} */
 const GraphBounding = { edges: new Map(), nodes: new Map() }
 
 /** Graph LCA relation @type {import("../actions/relation.js").GraphRelation} */
@@ -57,8 +65,6 @@ onmessage = async ({ data: { type, params } }) => {
       // simulator.send({ type: "PREVIEW.CLEAR" })
       break
     case "DOM.BOUNDED":
-      console.log("[worker]", type, params)
-
       const /** @type {import("types").GraphSize}}*/ { edges, nodes } = params
       for (let [id, size] of nodes) GraphBounding.nodes.set(id, { size })
       for (let [id, size] of edges) GraphBounding.edges.set(id, { size })
@@ -108,7 +114,7 @@ onmessage = async ({ data: { type, params } }) => {
           ],
         }
       }
-      const rootEdges = GraphRelation.nodes.get(rootID)
+      const rootEdges = GraphRelation.nodes.has(undefined) ? GraphRelation.nodes.get(undefined) : []
       const layoutElkNode = await elk.layout({
         id: "root",
         edges: rootEdges.map(getElkEdge), // Само-переходы машины
@@ -119,8 +125,69 @@ onmessage = async ({ data: { type, params } }) => {
           "elk.layered.crossingMinimization.semiInteractive": "true",
         },
       })
-      console.log("[worker]", layoutElkNode)
+      const /**@type {Map<string, import("src/actions/layout.js").ELKNode>} */ stateNodeToElkNodeMap = new Map()
 
+      /** @param {import("elkjs").ElkExtendedEdge} elkEdge */
+      const setEdgeLayout = (elkEdge) => {
+        const lca = GraphRelation.edges.get(elkEdge.id)
+        // if (!lca) return
+        const elkLca = stateNodeToElkNodeMap.get(lca)
+        const edge = GraphBounding.edges.get(elkEdge.id)
+        if (elkEdge.sections) {
+          /**@type {import("elkjs").ElkEdgeSection[]} */
+          const translatedSections = elkLca
+            ? elkEdge.sections.map((section) => ({
+                ...section,
+                startPoint: {
+                  x: section.startPoint.x + elkLca.absolutePosition.x,
+                  y: section.startPoint.y + elkLca.absolutePosition.y,
+                },
+                endPoint: {
+                  x: section.endPoint.x + elkLca.absolutePosition.x,
+                  y: section.endPoint.y + elkLca.absolutePosition.y,
+                },
+                bendPoints: section.bendPoints?.map((bendPoint) => {
+                  return {
+                    x: bendPoint.x + elkLca.absolutePosition.x,
+                    y: bendPoint.y + elkLca.absolutePosition.y,
+                  }
+                }),
+              }))
+            : elkEdge.sections
+          if (translatedSections) edge.sections = translatedSections
+        }
+        edge.position = {
+          x: (elkEdge.labels?.[0].x || 0) + (elkLca?.absolutePosition.x || 0),
+          y: (elkEdge.labels?.[0].y || 0) + (elkLca?.absolutePosition.y || 0),
+        }
+      }
+      /**
+       * @param {import("src/actions/layout.js").ELKNode} elkNode
+       * @param {import("src/actions/layout.js").ELKNode | undefined} parent
+       */
+      const setLayout = (elkNode, parent) => {
+        stateNodeToElkNodeMap.set(elkNode.id, elkNode)
+        elkNode.absolutePosition = {
+          x: (parent?.absolutePosition.x ?? 0) + elkNode.x,
+          y: (parent?.absolutePosition.y ?? 0) + elkNode.y,
+        }
+        const node = GraphBounding.nodes.get(elkNode.id)
+        node.size = {
+          width: elkNode.width,
+          height: elkNode.height,
+        }
+        node.position = {
+          x: (parent?.absolutePosition.x ?? 0) + elkNode.x,
+          y: (parent?.absolutePosition.y ?? 0) + elkNode.y,
+        }
+        elkNode.edges.forEach(setEdgeLayout)
+        //@ts-ignore
+        elkNode.children?.forEach((cn) => setLayout(cn, elkNode))
+      }
+      layoutElkNode.edges.forEach(setEdgeLayout)
+      setLayout(layoutElkNode.children[0], undefined)
+      console.log("[worker]", GraphBounding)
+      postMessage({ type: "DOM.LAYOUT", params: GraphBounding })
       break
     default:
       console.log("[worker]", type, params)

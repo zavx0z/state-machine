@@ -43,6 +43,23 @@ class StateMachine extends HTMLElement {
           }
           this.#shadowRoot.append(container.content)
           break
+        case "DOM.LAYOUT":
+          const /** @type {import("./core/worker.js").GraphBounding} */ GraphBounding = params
+          for (const [id, node] of GraphBounding.nodes) {
+            const element = this.#shadowRoot.getElementById(id)
+            element.style.left = `${node.position.x}px`
+            element.style.top = `${node.position.y}px`
+            element.style.width = `${node.size.width}px`
+            element.style.height = `${node.size.height}px`
+            element.style.opacity = "1"
+          }
+          for (const [id, edge] of GraphBounding.edges) {
+            const element = this.#shadowRoot.getElementById(id)
+            element.style.left = `${edge.position.x}px`
+            element.style.top = `${edge.position.y}px`
+            element.style.opacity = "1"
+          }
+          break
         default:
           console.log("[shadow]", type, params)
           break
