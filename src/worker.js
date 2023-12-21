@@ -1,5 +1,5 @@
 import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
-import { convertToGraph } from "./utils/directedGraph.js"
+import { convertToGraph } from "./actions/parse.js"
 import { createSimulator } from "./simulator.js"
 /**
  * @typedef {Object} Size
@@ -21,7 +21,7 @@ import { createSimulator } from "./simulator.js"
  * @typedef {BoundingBox & import("./components/Node.js").NodeInfo} Node
  * @typedef {BoundingBox & import("./components/Edge.js").EdgeInfo} Edge
  *
- * @typedef {object} Graph
+ * @typedef {Object} Graph
  * @property {Map<string, Node>} nodes
  * @property {Map<string, Edge>} edges
  */
@@ -31,7 +31,7 @@ onmessage = ({ data: { type, params } }) => {
   switch (type) {
     case "GRAPH.IDLE":
       postMessage({ type: "WORKER.LOADED" })
-      const /**@type {import("types").MachineJSON} */ machineObj = JSON.parse(params)
+      const /**@type {import("./actions/parse.js").MachineJSON} */ machineObj = JSON.parse(params)
       machineObj["predictableActionArguments"] = true // TODO: predictableActionArguments set default true
       const { relation, info } = convertToGraph(machineObj)
       graph = info

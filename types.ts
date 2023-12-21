@@ -6,7 +6,6 @@ import type {
   EventObject,
   Interpreter,
 } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
-export type MachineJSON = StateNodeDefinition<any, any, any> & { transition: string[] }
 
 type Size = { width: number; height: number }
 export type Point = { x: number; y: number }

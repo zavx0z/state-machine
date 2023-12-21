@@ -1,13 +1,7 @@
+import { flatten, uuidv4 } from "../utils/utils.js"
 /**
- * @typedef {import("types").MachineJSON} MachineJSON
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm").StateNodeDefinition<any, any, any> & { transition: string[]}} MachineJSON
  */
-
-/** Выравнивание массива.
- * @template T
- * @param {Array<T | T[]>} array - Массив с элементами или с вложенными массивами.
- * @returns {T[]} - Одноуровневый массив.
- */
-const flatten = (array) => Array.prototype.concat.apply([], array)
 
 /** Converts a state machine or state node to a graph representation.
  * @param {MachineJSON} machine - The state machine to convert.
@@ -28,14 +22,14 @@ export function convertToGraph(machine) {
    * @param {StateNode} stateNode - The state machine or state node.
    * @param {string | undefined}  parentID - StateNode parent id
    */
-  function toDirectedGraph(stateNode, parentID) {
+  function parse(stateNode, parentID) {
     const nodePath = stateNode.id
     nodeCounter++
     flatten(
       stateNode.transitions.map((transition, transitionIndex) =>
         (transition.target || [nodePath]).map((target, idx) => {
           edgeCounter++
-          const id = "edge-" + String(edgeCounter).padStart(4, "0")
+          const id = uuidv4()
           // console.log(transition) // TODO: actions
           info.edges.set(id, {
             type: transition.eventType,
@@ -56,7 +50,7 @@ export function convertToGraph(machine) {
         })
       )
     )
-    const id = "node-" + String(nodeCounter).padStart(4, "0")
+    const id = uuidv4()
     info.nodes.set(id, {
       type: stateNode.type,
       key: stateNode.key,
@@ -82,8 +76,8 @@ export function convertToGraph(machine) {
       size: { width: 0, height: 0 },
       position: { x: 0, y: 0 },
     })
-    Object.values(stateNode.states).map((state) => toDirectedGraph(state, nodePath))
+    Object.values(stateNode.states).map((state) => parse(state, nodePath))
   }
-  toDirectedGraph(machine, undefined)
+  parse(machine, undefined)
   return { relation: { edges, nodes }, info }
 }
