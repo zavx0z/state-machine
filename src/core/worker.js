@@ -1,5 +1,5 @@
 import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
-import { representation } from "./actions/repr.js"
+import { representation } from "../actions/repr.js"
 import { createSimulator } from "./simulator.js"
 /**
  * @typedef {Object} Size
@@ -18,8 +18,8 @@ import { createSimulator } from "./simulator.js"
  * @property {Position} [position={ x: 0, y: 0 }]
  * @property {Size} [size={ width: 0, height: 0 }]
  *
- * @typedef {BoundingBox & import("./components/Node.js").NodeInfo} Node
- * @typedef {BoundingBox & import("./components/Edge.js").EdgeInfo} Edge
+ * @typedef {BoundingBox & import("../templates/Node.js").NodeInfo} Node
+ * @typedef {BoundingBox & import("../templates/Edge.js").EdgeInfo} Edge
  *
  * @typedef {Object} Graph
  * @property {Map<string, Node>} nodes
@@ -28,12 +28,12 @@ import { createSimulator } from "./simulator.js"
 let /**@type {Graph} */ graph
 
 const /**@type {import("../index.js").GraphInfo}*/ GraphInfo = { edges: new Map(), nodes: new Map() }
-const /**@type {import("./actions/relation.js").GraphRelation}*/ GraphRelation = { edges: new Map(), nodes: new Map() }
+const /**@type {import("../actions/relation.js").GraphRelation}*/ GraphRelation = { edges: new Map(), nodes: new Map() }
 onmessage = ({ data: { type, params } }) => {
   switch (type) {
     case "DOM.IDLE":
       postMessage({ type: "WORKER.LOADED" })
-      const /**@type {import("./actions/repr.js").Machine} */ machineObj = JSON.parse(params)
+      const /**@type {import("../actions/repr.js").Machine} */ machineObj = JSON.parse(params)
       machineObj["predictableActionArguments"] = true // TODO: predictableActionArguments set default true
 
       representation(machineObj, GraphInfo, GraphRelation)

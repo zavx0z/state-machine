@@ -5,7 +5,7 @@ import { flatten, uuidv4 } from "../utils/utils.js"
 /**
  * Converts a state machine to a graph representation.
  * @param {Machine} machine - The state machine.
- * @param {import("../../index.js").GraphInfo} info - The graph info.
+ * @param {import("../index.js").GraphInfo} info - The graph info.
  * @param {import("./relation.js").GraphRelation} relation - The graph relation.
  */
 export function representation(machine, info, relation) {

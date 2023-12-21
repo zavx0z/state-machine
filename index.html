@@ -20,7 +20,7 @@
     <script src="https://zavx0z.github.io/dev-tools/index.js" type="module"></script>
     <script type="module">
       await new Promise((res) => import("https://zavx0z.github.io/dev-tools/index.js").then(() => setTimeout(res, 200)))
-      await import("./index.js")
+      await import("./src/index.js")
 
       const machine = document.querySelector("state-machine")
       const unsubscribe = machine.subscribe((state, event) => {
