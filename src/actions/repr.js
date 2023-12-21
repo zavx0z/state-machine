@@ -6,7 +6,7 @@ import { flatten } from "../utils/utils.js"
  * Converts a state machine to a graph representation.
  * @param {Machine} machine - The state machine.
  * @param {import("../index.js").GraphInfo} info - The graph info.
- * @param {import("./relation.js").GraphRelation} relation - The graph relation.
+ * @param {import("./relation.js").MachineRelation} relation - The graph relation.
  */
 export function representation(machine, info, relation) {
   /** Generates a directed graph representation of a state machine or state node.

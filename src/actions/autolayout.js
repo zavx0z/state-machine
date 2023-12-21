@@ -8,13 +8,13 @@
    * @returns {ElkNode}
    */
   function getElkChild(nodeID, rMap) {
-    const node = nodes.get(nodeID)!
+    const node = nodes.get(nodeID)
     const layout = node.meta.layout // Достаем информацию о разметке текущего узла
     const rEdges = rMap[0].get(nodeID) || [] // Получаем исходящие грани текущего узла из карты относительных граней
     return {
       id: nodeID,
-      width: layout.width,
-      height: layout.height,
+      width: node.size.width,
+      height: node.size.height,
       children: node.children.map((childID) => getElkChild(childID, rMap)),
       edges: rEdges.map((edgeID) => getElkEdge(edges.get(edgeID)!)),
       layoutOptions: {
