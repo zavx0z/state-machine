@@ -4,7 +4,7 @@
         "module": "NodeNext",
         "baseUrl": ".",
         "paths": {
-            "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm": [
+            "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm": [
                 "../dist"
             ],
             "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/+esm": [

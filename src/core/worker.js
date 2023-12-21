@@ -1,6 +1,7 @@
 import { fetchMachine } from "../utils/provider.js"
 import { representation } from "../actions/repr.js"
 import { createSimulator } from "./simulator.js"
+import { relation } from "../actions/relation.js"
 /**
  * @typedef {Object} Size
  * @property {number} width
@@ -16,7 +17,7 @@ import { createSimulator } from "./simulator.js"
  *
  * @typedef {Object} BoundingBox
  * @property {Position} [position={ x: 0, y: 0 }]
- * @property {Size} [size={ width: 0, height: 0 }]
+ * @property {Size} size
  *
  * @typedef {BoundingBox & import("../templates/Node.js").NodeInfo} Node
  * @typedef {BoundingBox & import("../templates/Edge.js").EdgeInfo} Edge
@@ -26,9 +27,12 @@ import { createSimulator } from "./simulator.js"
  * @property {Map<string, Edge>} edges
  */
 let /**@type {Graph} */ graph
-
 const /**@type {import("../index.js").GraphInfo}*/ GraphInfo = { edges: new Map(), nodes: new Map() }
 const /**@type {import("../actions/relation.js").GraphRelation}*/ GraphRelation = { edges: new Map(), nodes: new Map() }
+const /**@type { {nodes: Map<String, BoundingBox>, edges: Map<String,BoundingBox>} }*/ GraphBounding = {
+    edges: new Map(),
+    nodes: new Map(),
+  }
 
 onmessage = async ({ data: { type, params } }) => {
   switch (type) {
@@ -38,6 +42,8 @@ onmessage = async ({ data: { type, params } }) => {
       const /**@type {import("../actions/repr.js").Machine}*/ machineObj = machine.toJSON()
       representation(machineObj, GraphInfo, GraphRelation)
       postMessage({ type: "DOM.RENDER", params: GraphInfo })
+      relation(GraphRelation)
+      console.log(GraphRelation)
       const simulator = createSimulator({
         machine: machine,
         state: machine.getInitialState(null),
@@ -50,15 +56,8 @@ onmessage = async ({ data: { type, params } }) => {
     case "DOM.BOUNDED":
       console.log("[worker]", type, params)
       const /** @type {import("types").GraphSize}}*/ { edges, nodes } = params
-      // console.log(params)
-
-      // for (let [id, size] of nodes) {
-      //   graph.nodes.get(id).size = size
-      // }
-      // for (let [id, size] of edges) {
-      //   graph.edges.get(id).size = size
-      // }
-      // console.log(graph)
+      for (let [id, size] of nodes) GraphBounding.nodes.set(id, { size })
+      for (let [id, size] of edges) GraphBounding.edges.set(id, { size })
       break
     default:
       console.log("[worker]", type, params)

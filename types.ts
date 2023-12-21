@@ -5,7 +5,7 @@ import type {
   AnyEventObject,
   EventObject,
   Interpreter,
-} from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
+} from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm"
 
 type Size = { width: number; height: number }
 export type Point = { x: number; y: number }
@@ -56,4 +56,4 @@ export {
   EventType,
   EventObject,
   Interpreter,
-} from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
+} from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm"

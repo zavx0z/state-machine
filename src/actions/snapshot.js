@@ -1,31 +1,23 @@
 /**
  * @typedef {Object} Node
- *
+ * @property {string[]} entry
+ * @property {string[]} exit
+ * @property {string[]} invoke
+ * @property {string} key
+ * @property {string} type
+ * @property {string[]} [tags]
+ * @property {import("src/core/worker").Size} size
+ * @property {import("src/core/worker").Position} position
+ * 
  * @typedef {Object} Edge
+ * @property {string} source
+ * @property {string} target
+ * @property {string} label
+ * @property {string} type
+ * @property {string | undefined} cond
+ * @property {import("elkjs").ElkEdgeSection[]} sections
+ * @property {import("src/core/worker").Size} size
+ * @property {import("src/core/worker").Position} position
+ * 
+ * @typedef { { nodes: Map<string, Node>, edges: Map<string, Edge> } } Graph
  */
-
-// export type Node = {
-//   entry: string[]
-//   exit: string[]
-//   invoke: string[]
-//   history: string | boolean | undefined
-//   initial: string | number | symbol | undefined
-//   key: string
-//   type: string
-//   order: number
-//   parent: string | undefined
-//   tags: string[]
-//   children: string[]
-//   size: Size
-//   position: Point
-// }
-// export type Edge = {
-//   source: string
-//   target: string
-//   label: string
-//   type: string
-//   cond: string | undefined
-//   sections: ElkEdgeSection[]
-//   size: Size
-//   position: Point
-// }
