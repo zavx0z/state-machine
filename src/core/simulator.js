@@ -1,7 +1,7 @@
 import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 /**
  * @typedef {import("types").AnyState} AnyState
- * @typedef {import("types").AnyStateMachine} AnyStateMachine
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm").AnyStateMachine} AnyStateMachine
  * @typedef {import("types").EventType} EventType
  * @typedef {import("types").EventObject} EventObject
  * @typedef {import("types").Interpreter} Interpreter

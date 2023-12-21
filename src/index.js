@@ -3,7 +3,6 @@
  * @property {Map<string, import("./templates/Node.js").NodeInfo>} nodes - Node data.
  * @property {Map<string, import("./templates/Edge.js").EdgeInfo>} edges - Edge data.
  */
-import { toMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
 import Node from "./templates/Node.js"
 import Edge from "./templates/Edge.js"
 const template = document.createElement("template")
@@ -14,15 +13,9 @@ class StateMachine extends HTMLElement {
   #shadowRoot = this.attachShadow({ mode: "closed" })
   #simulator = new Worker("./src/core/worker.js", { type: "module" })
   constructor() {
-    console.log("constructor")
     super()
     this.#shadowRoot.appendChild(template.content)
-    fetch(this.getAttribute("src"))
-      .then((Response) => Response.text())
-      .then((xml) => {
-        const machine = toMachine(xml, {})
-        this.#simulator.postMessage({ type: "DOM.IDLE", params: JSON.stringify(machine.toJSON()) })
-      })
+    this.#simulator.postMessage({ type: "DOM.IDLE", params: this.getAttribute("src") })
     this.#simulator.onmessage = ({ data: { type, params } }) => {
       switch (type) {
         case "DOM.RENDER":
@@ -55,10 +48,8 @@ class StateMachine extends HTMLElement {
           break
       }
     }
-    console.log("constructor2")
   }
   connectedCallback() {
-    console.log("connected")
     // Get size information for each node and edge element and send it to the this.#worker thread
     const observer = new MutationObserver(() => {
       const /** @type {import("types").GraphSize}}*/ graphSize = { nodes: new Map(), edges: new Map() }
@@ -80,19 +71,6 @@ class StateMachine extends HTMLElement {
   }
   disconnectedCallback() {
     this.#simulator.terminate()
-  }
-  /** @type {import("types").SubscribeCallback[]} */
-  listeners = []
-  /** Подписка на события машины
-   * @param {import("types").SubscribeCallback} callback
-   * @returns unsubscribe function
-   */
-  subscribe(callback) {
-    this.listeners.push(callback)
-    return () => this.listeners.splice(this.listeners.indexOf(callback), 1)
-  }
-  send({ type, params }) {
-    this.machine.send({ type, params })
   }
   render() {}
 }

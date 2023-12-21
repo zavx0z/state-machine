@@ -1,4 +1,4 @@
-import { createMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.6/+esm"
+import { fetchMachine } from "../utils/provider.js"
 import { representation } from "../actions/repr.js"
 import { createSimulator } from "./simulator.js"
 /**
@@ -29,17 +29,15 @@ let /**@type {Graph} */ graph
 
 const /**@type {import("../index.js").GraphInfo}*/ GraphInfo = { edges: new Map(), nodes: new Map() }
 const /**@type {import("../actions/relation.js").GraphRelation}*/ GraphRelation = { edges: new Map(), nodes: new Map() }
-onmessage = ({ data: { type, params } }) => {
+
+onmessage = async ({ data: { type, params } }) => {
   switch (type) {
     case "DOM.IDLE":
-      postMessage({ type: "WORKER.LOADED" })
-      const /**@type {import("../actions/repr.js").Machine} */ machineObj = JSON.parse(params)
-      machineObj["predictableActionArguments"] = true // TODO: predictableActionArguments set default true
-
+      const machine = await fetchMachine(params)
+      //@ts-ignore TODO: fix type
+      const /**@type {import("../actions/repr.js").Machine}*/ machineObj = machine.toJSON()
       representation(machineObj, GraphInfo, GraphRelation)
       postMessage({ type: "DOM.RENDER", params: GraphInfo })
-
-      const machine = createMachine(machineObj)
       const simulator = createSimulator({
         machine: machine,
         state: machine.getInitialState(null),

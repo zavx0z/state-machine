@@ -19,25 +19,13 @@
     </style>
     <script src="https://zavx0z.github.io/dev-tools/index.js" type="module"></script>
     <script type="module">
-      await new Promise((res) => import("https://zavx0z.github.io/dev-tools/index.js").then(() => setTimeout(res, 200)))
-      await import("./src/index.js")
-
-      const machine = document.querySelector("state-machine")
-      const unsubscribe = machine.subscribe((state, event) => {
-        switch (event.type) {
-          case "machine.init":
-            machine.send({ type: "turn.on" })
-            break
-          default:
-            console.log(event.type, state.value)
-            break
-        }
-      })
+      // await new Promise((res) => import("https://zavx0z.github.io/dev-tools/index.js").then(() => setTimeout(res, 200)))
+      import("./src/index.js")
     </script>
     <dev-tools mobile></dev-tools>
   </head>
   <body>
     <p>state machine</p>
-    <state-machine src="machine.scxml"></state-machine>
+    <state-machine src="/machine.scxml" />
   </body>
 </html>
