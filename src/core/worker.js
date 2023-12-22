@@ -30,7 +30,7 @@ import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk-api.min.js"
  * 
  */
 // @ts-ignore
-const elk = new ELK({ workerUrl: "/src/utils/elk-worker.min.js" })
+const elk = new ELK({ workerUrl: "../utils/elk-worker.min.js" })
 
 /** Data structure for graph visualization @type {import("../index.js").GraphInfo} */
 const GraphInfo = { edges: new Map(), nodes: new Map() }
