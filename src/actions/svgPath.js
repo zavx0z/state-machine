@@ -6,7 +6,7 @@
  * @typedef {[Point, Point]} LineSegment
  * @typedef {Point[]} Path
  * @typedef {"top"| "right" | "bottom" | "left"} Sides
- * @typedef {MPathParam | LPathParam | ZPathParam | CPathParam | QPathParam} PathParam
+ * @typedef { MPathParam | LPathParam | ZPathParam | CPathParam | QPathParam } PathParam
  * @typedef {[MPathParam, ...PathParam[]]} SvgPath
  * @typedef {["M", Point]} MPathParam
  * @typedef {["L", Point]} LPathParam

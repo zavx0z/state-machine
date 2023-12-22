@@ -83,7 +83,7 @@
 .edge {
   visibility: hidden;
   position: fixed;
-  z-index: 40;
+  z-index: 9999;
   display: flex;
   cursor: pointer;
   align-items: center;
@@ -148,4 +148,19 @@
 }
 .edge-cond::after {
   content: "]";
+}
+
+svg {
+  pointer-events: none;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  height: 100%;
+  width: 100%;
+  overflow: visible;
+  z-index: 9999;
+}
+.line {
+  fill: rgb(var(--tertiary-900) / 1);
+  stroke: rgb(var(--tertiary-900) / 1);
 }

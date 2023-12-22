@@ -6,6 +6,7 @@
 import Node from "./templates/Node.js"
 import Edge from "./templates/Edge.js"
 import Line from "./templates/Line.js"
+// import Line from "./templates/Line.js"
 const template = document.createElement("template")
 template.innerHTML = /*html*/ `
 <link rel="stylesheet" href="./src/styles.css" type="text/css">
@@ -60,9 +61,11 @@ class StateMachine extends HTMLElement {
             element.style.top = `${edge.position.y}px`
             element.style.visibility = "visible"
           }
-          for (const [id, edge] of GraphBounding.edges) {
-            // Line({id, sourceRect: GraphBounding.nodes.get())})
-          }
+          break
+        case "LINES.INIT":
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+          for (const [id, path] of params) svg.innerHTML += Line(id, path)
+          this.#shadowRoot.append(svg)
           break
         default:
           console.log("[shadow]", type, params)

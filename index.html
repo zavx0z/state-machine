@@ -16,11 +16,16 @@
         color: #edf8fc;
         /* --color-tertiary-900: 255 141 141; */
       }
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100svh;
+        width: 100svw;
+      }
     </style>
     <script type="module">
       // await new Promise((res) => import("https://zavx0z.github.io/dev-tools/index.js").then(() => setTimeout(res, 200)))
       import("./src/index.js")
-      console.log(window.location.href)
     </script>
     <dev-tools mobile></dev-tools>
   </head>
