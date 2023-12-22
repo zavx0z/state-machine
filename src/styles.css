@@ -14,7 +14,7 @@
   --error-500: var(--color-error-500, 255 141 141);
 }
 .node {
-  opacity: 0;
+  visibility: hidden;
   position: absolute;
   color: rgb(var(--primary-200) / var(--text-opacity, 1));
   transition-property: opacity;
@@ -81,7 +81,7 @@
   opacity: 0.5;
 }
 .edge {
-  opacity: 0;
+  visibility: hidden;
   position: fixed;
   z-index: 40;
   display: flex;

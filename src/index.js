@@ -5,8 +5,9 @@
  */
 import Node from "./templates/Node.js"
 import Edge from "./templates/Edge.js"
+import Line from "./templates/Line.js"
 const template = document.createElement("template")
-template.innerHTML = String.raw`
+template.innerHTML = /*html*/ `
 <link rel="stylesheet" href="./src/styles.css" type="text/css">
 `
 class StateMachine extends HTMLElement {
@@ -36,7 +37,7 @@ class StateMachine extends HTMLElement {
             element.addEventListener("mouseenter", () =>
               this.#simulator.postMessage({ type: "SIMULATOR.PREVIEW", eventType: edge.type })
             )
-            element.addEventListener("mouseleave", () =>
+            element.addEventListener("mouseleave", (event) =>
               this.#simulator.postMessage({ type: "SIMULATOR.PREVIEW.CLEAR" })
             )
             container.content.append(template.content)
@@ -51,13 +52,16 @@ class StateMachine extends HTMLElement {
             element.style.top = `${node.position.y}px`
             element.style.width = `${node.size.width}px`
             element.style.height = `${node.size.height}px`
-            element.style.opacity = "1"
+            element.style.visibility = "visible"
           }
           for (const [id, edge] of GraphBounding.edges) {
             const element = this.#shadowRoot.getElementById(id)
             element.style.left = `${edge.position.x}px`
             element.style.top = `${edge.position.y}px`
-            element.style.opacity = "1"
+            element.style.visibility = "visible"
+          }
+          for (const [id, edge] of GraphBounding.edges) {
+            // Line({id, sourceRect: GraphBounding.nodes.get())})
           }
           break
         default:
