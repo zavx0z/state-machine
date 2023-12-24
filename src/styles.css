@@ -12,6 +12,10 @@
   --surface-800: var(--color-surface-800, 34 46 64);
   --success-500: var(--color-success-500, 158 217 157);
   --error-500: var(--color-error-500, 255 141 141);
+  /* prevent-select */
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
 }
 .node {
   visibility: hidden;
