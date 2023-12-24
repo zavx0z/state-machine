@@ -17,9 +17,9 @@ const html = String.raw
 export default ({ id, entry, exit, invoke, key, type }) => {
   const markedType = ["history", "final"].includes(type)
   return html`
-    <div class="node" id="${id}">
+    <div class="node" id="${id}" data-active="false" data-preview="false">
       <div class="node-container">
-        <div class="node-content" data-active="false" data-preview="false">
+        <div class="node-content">
           <div>
             ${markedType ? html`<div class="node-type" data-node-type=${type} />` : ""}
             <div class="node-title">${key}</div>

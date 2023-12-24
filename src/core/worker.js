@@ -35,7 +35,7 @@ import { getPath, pathToD } from "../actions/svgPath.js"
 const elk = new ELK({ workerUrl: "../utils/elk-worker.min.js" })
 
 /** Data structure for graph visualization @type {import("../index.js").GraphInfo} */
-const GraphInfo = { edges: new Map(), nodes: new Map() }
+const GraphInfo = { edges: new Map(), nodes: new Map(), machine: "[machine]" }
 
 /** Relation structure Machine @type {import("../actions/relation.js").MachineRelation}*/
 const MachineRelation = { edges: new Map(), nodes: new Map() }
@@ -47,6 +47,8 @@ const GraphBounding = { edges: new Map(), nodes: new Map() }
 let GraphRelation
 
 let rootID
+
+let simulator
 onmessage = async ({ data: { type, params } }) => {
   switch (type) {
     case "DOM.IDLE":
@@ -55,14 +57,18 @@ onmessage = async ({ data: { type, params } }) => {
       //@ts-ignore TODO: fix type
       const /**@type {import("../actions/repr.js").Machine}*/ machineObj = machine.toJSON()
       representation(machineObj, GraphInfo, MachineRelation)
-      postMessage({ type: "DOM.RENDER", params: GraphInfo })
+      postMessage({ type: "DOM.RENDER", params: { ...GraphInfo, machine: rootID } })
       GraphRelation = machineToGraphRelation(MachineRelation)
-      const simulator = createSimulator({
+
+      const channel = new BroadcastChannel(machine.id)
+      simulator = createSimulator({
         machine: machine,
         state: machine.getInitialState(null),
       }).start()
       simulator.onTransition((state, transition) => {
-        console.log("[simulator]", transition.type, state.value)
+        const active = state.context.state.configuration.map((i) => i.id)
+        channel.postMessage({ active })
+        // console.log("[simulator]", transition.type, state.value)
       })
       // simulator.send({ type: "PREVIEW.CLEAR" })
       break
@@ -172,7 +178,7 @@ onmessage = async ({ data: { type, params } }) => {
           x: (parent?.absolutePosition.x ?? 0) + elkNode.x,
           y: (parent?.absolutePosition.y ?? 0) + elkNode.y,
         }
-        
+
         node.size = {
           width: elkNode.width,
           height: elkNode.height,
