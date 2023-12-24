@@ -26,7 +26,6 @@ class StateMachine extends HTMLElement {
           this.#render(nodes, edges)
           const channel = new BroadcastChannel(machine)
           channel.onmessage = ({ data: { active } }) => {
-            for (const id of active) this.#shadowRoot.getElementById(id).dataset.active = "true"
             console.log(active)
           }
           break
@@ -51,6 +50,14 @@ class StateMachine extends HTMLElement {
           const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
           for (const [id, path] of params) svg.innerHTML += Line(id, path)
           this.#shadowRoot.append(svg)
+          break
+        case "STATE.ACTIVE":
+          for (const element of this.#shadowRoot.querySelectorAll(".node")) {
+            if (element instanceof HTMLElement && element.dataset.active == "true" && !params.includes(element.id))
+              element.dataset.active = "false"
+            else if (element instanceof HTMLElement && element.dataset.active == "false" && params.includes(element.id))
+              element.dataset.active = "true"
+          }
           break
         default:
           console.log("[shadow]", type, params)
@@ -103,10 +110,10 @@ class StateMachine extends HTMLElement {
         this.#simulator.postMessage({ type: "MACHINE.EVENT", event: { type: edge.type } })
       )
       element.addEventListener("mouseenter", () =>
-        this.#simulator.postMessage({ type: "SIMULATOR.PREVIEW", eventType: edge.type })
+        this.#simulator.postMessage({ type: "STATE.PREVIEW.SET", eventType: edge.type })
       )
       element.addEventListener("mouseleave", (event) =>
-        this.#simulator.postMessage({ type: "SIMULATOR.PREVIEW.CLEAR" })
+        this.#simulator.postMessage({ type: "STATE.PREVIEW.CLEAR" })
       )
       container.content.append(template.content)
     }

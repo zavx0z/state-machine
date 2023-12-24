@@ -60,14 +60,13 @@ onmessage = async ({ data: { type, params } }) => {
       postMessage({ type: "DOM.RENDER", params: { ...GraphInfo, machine: rootID } })
       GraphRelation = machineToGraphRelation(MachineRelation)
 
-      const channel = new BroadcastChannel(machine.id)
       simulator = createSimulator({
         machine: machine,
         state: machine.getInitialState(null),
       }).start()
       simulator.onTransition((state, transition) => {
         const active = state.context.state.configuration.map((i) => i.id)
-        channel.postMessage({ active })
+        postMessage({ type: "STATE.ACTIVE", params: active })
         // console.log("[simulator]", transition.type, state.value)
       })
       // simulator.send({ type: "PREVIEW.CLEAR" })

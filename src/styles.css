@@ -36,7 +36,6 @@
   border-color: rgb(var(--surface-700) / var(--border-opacity, 1));
 }
 .node-content {
-  border-radius: 0.5rem 0.5rem 0 0 /* 8px */;
   padding: 0.5rem /* 8px */;
   align-self: flex-start;
   overflow: hidden;
@@ -45,7 +44,10 @@
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
-.node-content:not(:has(.actions)) {
+.node-content:has(.node-content .actions) {
+  border-radius: 0.5rem 0.5rem 0 0 /* 8px */;
+}
+.node-content:not(:has(.node-content .actions)) {
   border-radius: 0.5rem;
 }
 .node[data-active="true"] {
