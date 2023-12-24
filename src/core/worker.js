@@ -20,11 +20,12 @@ import { getPath, pathToD } from "../actions/svgPath.js"
  *
  * @typedef {Object} BoundingBox
  * @property {Size} size
- * @property {Position} [position={ x: 0, y: 0 }]
+ * @property {Position} [position]
+ * @property {Position} [absolutePosition]
 
  * @typedef {Object} EdgeBoundingBox
  * @property {Size} size
- * @property {Position} [position={ x: 0, y: 0 }]
+ * @property {Position} [position]
  * @property {import("elkjs").ElkEdgeSection[]} [sections]
  * 
  * @typedef {{ edges:Map<string, EdgeBoundingBox>, nodes: Map<string, BoundingBox>}} GraphBounding
@@ -136,29 +137,25 @@ onmessage = async ({ data: { type, params } }) => {
         const lca = GraphRelation.edges.get(elkEdge.id)
         const elkLca = stateNodeToElkNodeMap.get(lca)
         const edge = GraphBounding.edges.get(elkEdge.id)
-        if (elkEdge.sections) {
-          /**@type {import("elkjs").ElkEdgeSection[]} */
-          const translatedSections = elkLca
-            ? elkEdge.sections.map((section) => ({
-                ...section,
-                startPoint: {
-                  x: section.startPoint.x + elkLca.absolutePosition.x,
-                  y: section.startPoint.y + elkLca.absolutePosition.y,
-                },
-                endPoint: {
-                  x: section.endPoint.x + elkLca.absolutePosition.x,
-                  y: section.endPoint.y + elkLca.absolutePosition.y,
-                },
-                bendPoints: section.bendPoints?.map((bendPoint) => {
-                  return {
-                    x: bendPoint.x + elkLca.absolutePosition.x,
-                    y: bendPoint.y + elkLca.absolutePosition.y,
-                  }
-                }),
-              }))
-            : elkEdge.sections
-          if (translatedSections) edge.sections = translatedSections
-        }
+        edge.sections = elkLca
+          ? elkEdge.sections.map((section) => ({
+              ...section,
+              startPoint: {
+                x: section.startPoint.x + elkLca.absolutePosition.x,
+                y: section.startPoint.y + elkLca.absolutePosition.y,
+              },
+              endPoint: {
+                x: section.endPoint.x + elkLca.absolutePosition.x,
+                y: section.endPoint.y + elkLca.absolutePosition.y,
+              },
+              bendPoints: section.bendPoints?.map((bendPoint) => {
+                return {
+                  x: bendPoint.x + elkLca.absolutePosition.x,
+                  y: bendPoint.y + elkLca.absolutePosition.y,
+                }
+              }),
+            }))
+          : elkEdge.sections
         edge.position = {
           x: (elkEdge.labels?.[0].x || 0) + (elkLca?.absolutePosition.x || 0),
           y: (elkEdge.labels?.[0].y || 0) + (elkLca?.absolutePosition.y || 0),
@@ -169,12 +166,13 @@ onmessage = async ({ data: { type, params } }) => {
        * @param {import("src/actions/layout.js").ELKNode | undefined} parent
        */
       const setLayout = (elkNode, parent) => {
+        const node = GraphBounding.nodes.get(elkNode.id)
         stateNodeToElkNodeMap.set(elkNode.id, elkNode)
         elkNode.absolutePosition = {
           x: (parent?.absolutePosition.x ?? 0) + elkNode.x,
           y: (parent?.absolutePosition.y ?? 0) + elkNode.y,
         }
-        const node = GraphBounding.nodes.get(elkNode.id)
+        
         node.size = {
           width: elkNode.width,
           height: elkNode.height,
@@ -230,6 +228,7 @@ onmessage = async ({ data: { type, params } }) => {
           let path
           if (sections.length) {
             const section = sections[0]
+            /* @ts-ignore */
             path = [["M", section.startPoint], ...(section.bendPoints?.map((point) => ["L", point]) || [])]
             const preLastPoint = path[path.length - 1][1]
             const xSign = Math.sign(section.endPoint.x - preLastPoint.x)

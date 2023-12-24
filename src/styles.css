@@ -20,18 +20,21 @@
   transition-property: opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+  z-index: 1;
+}
+.node-container {
+  height: 100%;
+  border-style: solid;
+  border-width: 2px;
+  box-sizing: border-box;
+  border-radius: 0.5rem /* 8px */;
+  border-color: rgb(var(--surface-700) / var(--border-opacity, 1));
 }
 .node-content {
-  height: 100%;
-  width: 100%;
   padding: 0.5rem /* 8px */;
   align-self: flex-start;
   overflow: hidden;
   background-color: rgb(var(--surface-700) / var(--bg-opacity, 1));
-  border-style: solid;
-  border-width: 2px;
-  border-radius: 0.5rem /* 8px */;
-  border-color: rgb(var(--surface-700) / var(--border-opacity, 1));
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
@@ -83,7 +86,7 @@
 .edge {
   visibility: hidden;
   position: fixed;
-  z-index: 9999;
+  z-index: 3;
   display: flex;
   cursor: pointer;
   align-items: center;
@@ -158,7 +161,7 @@ svg {
   height: 100%;
   width: 100%;
   overflow: visible;
-  z-index: 9999;
+  z-index: 2;
 }
 .line {
   fill: rgb(var(--tertiary-900) / 1);

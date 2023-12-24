@@ -82,6 +82,7 @@ class StateMachine extends HTMLElement {
           case "node":
           case "edge":
             const { width, height } = element.getBoundingClientRect()
+            console.log(element.id, width)
             graphSize[`${element.className}s`].set(element.id, { width, height })
             break
           default:
