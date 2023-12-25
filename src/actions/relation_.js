@@ -13,7 +13,7 @@ export function representation(Machine, MetaData, MachineRelation) {
    */
   function repr(stateNode, parentUUID) {
     const stateID = stateNode.id
-    // const nodeUUID = uuidv4()
+    const transitions = []
     flatten(
       stateNode.transitions.map((transition, transitionIndex) => {
         //@ts-ignore TODO: AnyStateNodeDefinition to AnyStateJSON
@@ -22,9 +22,8 @@ export function representation(Machine, MetaData, MachineRelation) {
             : [stateID]
         // const /**@type {string[]} */ targets = transition.target || [stateID]
         targets.map((target, targetIndex) => {
-          // console.log(transition) // TODO: actions
           const transitionID = `${stateID}:${transitionIndex}:${targetIndex}`
-          // const transitionUUID = uuidv4()
+          transitions.push(transitionID)
           MetaData.events.set(transitionID, {
             type: transition.eventType,
             cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
@@ -52,6 +51,7 @@ export function representation(Machine, MetaData, MachineRelation) {
         .toSorted((a, b) => b.order - a.order)
         .map((state) => state.id),
       parent: parentUUID,
+      transitions: transitions,
     })
     Object.values(stateNode.states).map((state) => repr(state, stateID))
   }

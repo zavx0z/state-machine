@@ -46,20 +46,28 @@ class StateMachine extends HTMLElement {
           for (const [id, path] of params) svg.innerHTML += Line(id, path)
           this.#host.append(svg)
           break
-        case "STATE":
+        case "EVENT":
           for (const element of this.#host.querySelectorAll(".node")) {
-            if (element instanceof HTMLElement && element.dataset.active == "true" && !params.includes(element.id))
-              element.dataset.active = "false"
-            else if (element instanceof HTMLElement && element.dataset.active == "false" && params.includes(element.id))
-              element.dataset.active = "true"
+            if (element instanceof HTMLElement) {
+              if (element.dataset.active == "true" && !params.nodes.includes(element.id))
+                element.dataset.active = "false"
+              else if (element.dataset.active == "false" && params.nodes.includes(element.id))
+                element.dataset.active = "true"
+            }
+          }
+          for (const element of this.#host.querySelectorAll(".edge")) {
+            if (element instanceof HTMLElement) {
+              if (element.dataset.active == "true" && !params.edges.includes(element.id))
+                element.dataset.active = "false"
+              else if (element.dataset.active == "false" && params.edges.includes(element.id))
+                element.dataset.active = "true"
+            }
           }
           break
         case "PREVIEW":
-          const { states, transitions } = params
-          for (const state of states) {
-            this.#host.getElementById(state).dataset.preview = "true"
-            console.log(state)
-          }
+          console.log("[shadow]", type, params)
+          for (const state of params.nodes) this.#host.getElementById(state).dataset.preview = "true"
+          for (const edge of params.edges) this.#host.getElementById(edge).dataset.preview = "true"
           break
         default:
           console.log("[shadow]", type, params)
@@ -108,13 +116,12 @@ class StateMachine extends HTMLElement {
       const template = document.createElement("template")
       template.innerHTML = Edge({ ...edge, id })
       const element = template.content.firstElementChild
-      element.addEventListener("click", () => this.#worker.postMessage({ type: "NEXT", event: { type: edge.type } }))
+      element.addEventListener("click", () => this.#worker.postMessage({ type: "EVENT", params: { type: edge.type } }))
       element.addEventListener("mouseenter", () => this.#worker.postMessage({ type: "PREVIEW", params: edge.type }))
       element.addEventListener("mouseleave", (event) => {
         this.#host.querySelectorAll('[data-preview="true"]').forEach((element) => {
           if (element instanceof HTMLElement) element.dataset.preview = "false"
         })
-        // TODO: clear
       })
       container.content.append(template.content)
     }

@@ -46,7 +46,11 @@ const MetaBounding = { edges: new Map(), nodes: new Map() }
 /** Graph LCA relation @type {import("../actions/relation_Machine_Graph.js").GraphRelation} */
 const MetaRelation = { edges: new Map(), nodes: new Map() }
 
-/** Graph Lines @type {Map<string, string>} */
+/** Graph Lines
+ * @typedef {string} lineID - event id
+ * @typedef {string} svgPath - SVG d string
+ * @type {Map<lineID, svgPath>}
+ */
 const MetaLines = new Map()
 
 let rootID
@@ -68,31 +72,31 @@ onmessage = async ({ data: { type, params } }) => {
         state: machine.getInitialState(null),
       }).start()
       simulator.onTransition((state, transition) => {
-        const active = state.context.state.configuration.map((state) => state.id)
+        const active = { nodes: [], edges: [] }
         switch (transition.type) {
           case "PREVIEW":
             if (state.context.previewEvent) {
-              const states = state.context.machine
-                .transition(state.context.state, { type: state.context.previewEvent })
-                .configuration.filter((state) => !active.includes(state.id))
-                .map((state) => state.id)
-
-              /** @type {string[]}*/
-              const transitions = []
-              for (const edge of MachineRelation.edges.values()) {
-                if (states.includes(edge.source)) {
-                  transitions.push(edge.id)
-                }
+              const preview = { nodes: [], edges: [] }
+              for (const node of state.context.machine .transition(state.context.state, { type: state.context.previewEvent }).configuration) {
+                if (!active.nodes.includes(node.id))
+                  preview.nodes.push(node.id)
+                MachineRelation.nodes.get(node.id).transitions.map((edge) => preview.edges.push(edge))
               }
-              postMessage({ type: "PREVIEW", params: { states, transitions } })
+              postMessage({ type: "PREVIEW", params: preview })
               simulator.send({ type: "PREVIEW", eventType: undefined })
             } else console.log("PREVIEW.CLEAR")
+            break
+          case "STATE.UPDATE":
+            for (const node of state.context.state.configuration) {
+              active.nodes.push(node.id)
+              MachineRelation.nodes.get(node.id).transitions.map((edge) => active.edges.push(edge))
+            }
+            postMessage({ type: "EVENT", params: active })
             break
           default:
             console.log(transition.type)
             break
         }
-        postMessage({ type: "STATE", params: active })
         // console.log("[simulator]", transition.type, state.value)
       })
       break
@@ -273,6 +277,9 @@ onmessage = async ({ data: { type, params } }) => {
       break
     case "PREVIEW":
       simulator.send({ type: "PREVIEW", eventType: params })
+      break
+    case "EVENT":
+      simulator.send({ type: "EVENT", event: params })
       break
     default:
       console.log("[worker]", type, params)

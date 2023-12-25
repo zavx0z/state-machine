@@ -130,7 +130,7 @@
   background-color: rgb(var(--tertiary-900) / var(--bg-opacity, 1));
   padding: 0.25rem /* 4px */ 0.5rem /* 8px */;
 }
-.edge-label[data-active="true"] {
+.edge[data-active="true"] .edge-label {
   background-color: rgb(var(--primary-500) / var(--bg-opacity, 1));
 }
 .edge-label[data-cond="true"] {

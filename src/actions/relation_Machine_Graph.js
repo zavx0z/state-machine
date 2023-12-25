@@ -3,6 +3,7 @@
  * @property {string} id - State node ID
  * @property {string} parent - Parent state node ID
  * @property {string[]} children - Child state node IDs
+ * @property {string[]} transitions - Transitions IDs
  * @typedef {Object} TransitionRelation - Object representing a transition relation
  * @property {string} id - Transition edge ID
  * @property {string} source - Source state node ID
