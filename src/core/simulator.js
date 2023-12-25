@@ -12,11 +12,10 @@ import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.n
  * @property {string} [InputType.previewEvent] - Имя события для предварительного просмотра
 /** Events 
  * @typedef { { type: "EVENT"; event: EventObject } } EVENT
- * @typedef { { type: "EVENT.PREVIEW"; eventType: EventType } } EVENT_PREVIEW
+ * @typedef { { type: "PREVIEW"; eventType: EventType } } PREVIEW
  * @typedef { { type: "STATE.UPDATE"; state: AnyState } } STATE_UPDATE
  * @typedef { { type: "MACHINE.UPDATE"; machine: AnyStateMachine } } MACHINE_UPDATE
- * @typedef { { type: "PREVIEW.CLEAR" } } PREVIEW_CLEAR
- * @typedef { EVENT | EVENT_PREVIEW | STATE_UPDATE | MACHINE_UPDATE | PREVIEW_CLEAR } SimulatorEvents
+ * @typedef { EVENT | PREVIEW | STATE_UPDATE | MACHINE_UPDATE } SimulatorEvents
 /** Schema 
  * @typedef {Object} schema
  * @property {SimulatorEvents} [schema.events]
@@ -75,11 +74,8 @@ export function createSimulator(input) {
             internal: false,
             actions: assign({ machine: (_, event) => event.machine }),
           },
-          "EVENT.PREVIEW": {
+          PREVIEW: {
             actions: assign({ previewEvent: (_, event) => event.eventType }),
-          },
-          "PREVIEW.CLEAR": {
-            actions: assign({ previewEvent: undefined }),
           },
         },
       },

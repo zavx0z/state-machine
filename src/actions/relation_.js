@@ -3,7 +3,7 @@ import { flatten } from "../utils/utils.js"
 
 /** Converts a state machine to a graph representation.
  * @param {Machine} Machine - The state machine.
- * @param {import("../index.js").GraphData} MetaData - Data state/transition/actions/services of the machine.
+ * @param {import("../index.js").Data} MetaData - Data state/transition/actions/services of the machine.
  * @param {import("./relation_Machine_Graph.js").MachineRelation} MachineRelation - The relation transition and nodes of the machine.
  */
 export function representation(Machine, MetaData, MachineRelation) {
@@ -25,7 +25,7 @@ export function representation(Machine, MetaData, MachineRelation) {
           // console.log(transition) // TODO: actions
           const transitionID = `${stateID}:${transitionIndex}:${targetIndex}`
           // const transitionUUID = uuidv4()
-          MetaData.edges.set(transitionID, {
+          MetaData.events.set(transitionID, {
             type: transition.eventType,
             cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
             label: transition.eventType, //TODO: label
@@ -38,7 +38,7 @@ export function representation(Machine, MetaData, MachineRelation) {
         })
       })
     )
-    MetaData.nodes.set(stateID, {
+    MetaData.states.set(stateID, {
       type: stateNode.type,
       key: stateNode.key,
       entry: stateNode.entry.map((entry) => entry.type),

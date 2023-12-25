@@ -34,8 +34,8 @@ import { getPath, pathToD } from "../actions/svgPath.js"
 // @ts-ignore
 const elk = new ELK({ workerUrl: "../utils/elk-worker.min.js" })
 
-/** Data structure for graph visualization @type {import("../index.js").GraphData} */
-const MetaData = { edges: new Map(), nodes: new Map(), machine: "[machine]" }
+/** Data structure for graph visualization @type {import("../index.js").Data} */
+const Data = { events: new Map(), states: new Map() }
 
 /** Relation structure Machine @type {import("../actions/relation_Machine_Graph.js").MachineRelation}*/
 const MachineRelation = { edges: new Map(), nodes: new Map() }
@@ -54,21 +54,13 @@ let rootID
 let simulator
 onmessage = async ({ data: { type, params } }) => {
   switch (type) {
-    case "STATE.PREVIEW.SET":
-      console.log("STATE.PREVIEW.SET", params)
-      simulator.send({ type: "EVENT.PREVIEW", eventType: params })
-      break
-    case "STATE.PREVIEW.CLEAR":
-      console.log("STATE.PREVIEW.CLEAR", params)
-      simulator.send({ type: "PREVIEW.CLEAR" })
-      break
-    case "DOM.IDLE":
+    case "CREATE":
       const machine = await fetchMachine(params)
       rootID = machine.id
       //@ts-ignore TODO: fix type
       const /**@type {import("../actions/relation_.js").Machine}*/ Machine = machine.toJSON()
-      representation(Machine, MetaData, MachineRelation)
-      postMessage({ type: "DOM.RENDER", params: { ...MetaData, machine: rootID } })
+      representation(Machine, Data, MachineRelation)
+      postMessage({ type: "CREATE", params: { ...Data, machine: rootID } })
       relation_Machine_to_Graph(MachineRelation, MetaRelation)
 
       simulator = createSimulator({
@@ -76,37 +68,33 @@ onmessage = async ({ data: { type, params } }) => {
         state: machine.getInitialState(null),
       }).start()
       simulator.onTransition((state, transition) => {
+        const active = state.context.state.configuration.map((state) => state.id)
         switch (transition.type) {
-          case "EVENT.PREVIEW":
+          case "PREVIEW":
             if (state.context.previewEvent) {
-              const previewIds = state.context.machine
+              const states = state.context.machine
                 .transition(state.context.state, { type: state.context.previewEvent })
-                .configuration.map((i) => i.id)
+                .configuration.filter((state) => !active.includes(state.id))
+                .map((state) => state.id)
 
-              const edges = []
+              /** @type {string[]}*/
+              const transitions = []
               for (const edge of MachineRelation.edges.values()) {
-                if (previewIds.includes(edge.source)) {
-                  edges.push(edge.id)
+                if (states.includes(edge.source)) {
+                  transitions.push(edge.id)
                 }
               }
-              console.log(edges)
-              const lines = []
-              const nodes = []
-              postMessage({ type: "STATE.PREVIEW.SET", params: previewIds })
-            }
-            break
-          case "PREVIEW.CLEAR":
-            postMessage({ type: "STATE.PREVIEW.CLEAR" })
+              postMessage({ type: "PREVIEW", params: { states, transitions } })
+              simulator.send({ type: "PREVIEW", eventType: undefined })
+            } else console.log("PREVIEW.CLEAR")
             break
           default:
+            console.log(transition.type)
             break
         }
-        console.log("[simulator]", transition.type, state.context)
-        const active = state.context.state.configuration.map((i) => i.id)
-        postMessage({ type: "STATE.ACTIVE", params: active })
+        postMessage({ type: "STATE", params: active })
         // console.log("[simulator]", transition.type, state.value)
       })
-      // simulator.send({ type: "PREVIEW.CLEAR" })
       break
     case "DOM.BOUNDED":
       // ======================= SET DOM BOUNDING SIZE ======================
@@ -141,7 +129,7 @@ onmessage = async ({ data: { type, params } }) => {
       const getElkEdge = (edgeID) => {
         const size = MetaBounding.edges.get(edgeID).size
         const relationTransition = MachineRelation.edges.get(edgeID)
-        const edgeInfo = MetaData.edges.get(edgeID)
+        const edgeInfo = Data.events.get(edgeID)
         return {
           id: edgeID,
           sources: [relationTransition.source],
@@ -281,7 +269,10 @@ onmessage = async ({ data: { type, params } }) => {
           }
         }
       }
-      postMessage({ type: "LINES.INIT", params: MetaLines })
+      postMessage({ type: "CONNECT", params: MetaLines })
+      break
+    case "PREVIEW":
+      simulator.send({ type: "PREVIEW", eventType: params })
       break
     default:
       console.log("[worker]", type, params)
