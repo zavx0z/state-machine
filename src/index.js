@@ -42,9 +42,7 @@ class StateMachine extends HTMLElement {
           }
           break
         case "CONNECT":
-          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-          for (const [id, path] of params) svg.innerHTML += Line(id, path)
-          this.#host.append(svg)
+          for (const [id, path] of params) this.#host.querySelector(`svg [id='${id}']>path`).setAttribute("d", path)
           break
         case "EVENT":
           for (const element of this.#host.querySelectorAll(".node")) {
@@ -63,9 +61,16 @@ class StateMachine extends HTMLElement {
                 element.dataset.active = "true"
             }
           }
+          for (const element of this.#host.querySelectorAll(".line")) {
+            if (element instanceof SVGElement) {
+              if (element.dataset.active == "true" && !params.edges.includes(element.id))
+                element.dataset.active = "false"
+              else if (element.dataset.active == "false" && params.edges.includes(element.id))
+                element.dataset.active = "true"
+            }
+          }
           break
         case "PREVIEW":
-          console.log("[shadow]", type, params)
           for (const state of params.nodes) this.#host.getElementById(state).dataset.preview = "true"
           for (const edge of params.edges) this.#host.getElementById(edge).dataset.preview = "true"
           break
@@ -126,6 +131,9 @@ class StateMachine extends HTMLElement {
       container.content.append(template.content)
     }
     this.#host.append(container.content)
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+    for (const [id, _] of edges) svg.innerHTML += Line(id, "")
+    this.#host.append(svg)
   }
   render() {}
 }

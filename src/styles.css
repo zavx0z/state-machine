@@ -186,3 +186,7 @@ svg {
   fill: rgb(var(--tertiary-900) / 1);
   stroke: rgb(var(--tertiary-900) / 1);
 }
+.line[data-active="true"] {
+  fill: rgb(var(--primary-500) / var(--bg-opacity, 1));
+  stroke: rgb(var(--primary-500) / var(--bg-opacity, 1));
+}
