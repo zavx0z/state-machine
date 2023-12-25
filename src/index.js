@@ -1,7 +1,7 @@
 /** Data received from the simulator.
- * @typedef {Object} GraphInfo - GRAPH.RENDER
- * @property {Map<string, import("./templates/Node.js").NodeInfo>} nodes - Node data.
- * @property {Map<string, import("./templates/Edge.js").EdgeInfo>} edges - Edge data.
+ * @typedef {Object} GraphData - GRAPH.RENDER
+ * @property {Map<string, import("./templates/Node.js").data_Node>} nodes - Node data.
+ * @property {Map<string, import("./templates/Edge.js").data_Edge>} edges - Edge data.
  * @property {string} machine - Machine name
  */
 import Node from "./templates/Node.js"
@@ -22,7 +22,7 @@ class StateMachine extends HTMLElement {
     this.#simulator.onmessage = ({ data: { type, params } }) => {
       switch (type) {
         case "DOM.RENDER":
-          const /** @type {GraphInfo}*/ { edges, nodes, machine } = params
+          const /** @type {GraphData}*/ { edges, nodes, machine } = params
           this.#render(nodes, edges)
           const channel = new BroadcastChannel(machine)
           channel.onmessage = ({ data: { active } }) => {
@@ -92,8 +92,8 @@ class StateMachine extends HTMLElement {
    * Renders the graph nodes and edges into the component's shadow DOM.
    * Takes the node and edge data and generates template elements
    * for each one, handling event listeners and appending to shadowRoot.
-   * @param {GraphInfo['nodes']}  nodes
-   * @param {GraphInfo['edges']}  edges
+   * @param {GraphData['nodes']}  nodes
+   * @param {GraphData['edges']}  edges
    */
   #render(nodes, edges) {
     const container = document.createElement("template")
@@ -110,11 +110,9 @@ class StateMachine extends HTMLElement {
         this.#simulator.postMessage({ type: "MACHINE.EVENT", event: { type: edge.type } })
       )
       element.addEventListener("mouseenter", () =>
-        this.#simulator.postMessage({ type: "STATE.PREVIEW.SET", eventType: edge.type })
+        this.#simulator.postMessage({ type: "STATE.PREVIEW.SET", params: edge.type })
       )
-      element.addEventListener("mouseleave", (event) =>
-        this.#simulator.postMessage({ type: "STATE.PREVIEW.CLEAR" })
-      )
+      element.addEventListener("mouseleave", (event) => this.#simulator.postMessage({ type: "STATE.PREVIEW.CLEAR" }))
       container.content.append(template.content)
     }
     this.#shadowRoot.append(container.content)

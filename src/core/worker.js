@@ -1,7 +1,7 @@
 import { fetchMachine } from "../utils/provider.js"
-import { representation } from "../actions/repr.js"
+import { representation } from "../actions/relation_.js"
 import { createSimulator } from "./simulator.js"
-import { machineToGraphRelation } from "../actions/relation.js"
+import relation_Machine_to_Graph from "../actions/relation_Machine_Graph.js"
 import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk-api.min.js"
 import { getPath, pathToD } from "../actions/svgPath.js"
 
@@ -34,37 +34,74 @@ import { getPath, pathToD } from "../actions/svgPath.js"
 // @ts-ignore
 const elk = new ELK({ workerUrl: "../utils/elk-worker.min.js" })
 
-/** Data structure for graph visualization @type {import("../index.js").GraphInfo} */
-const GraphInfo = { edges: new Map(), nodes: new Map(), machine: "[machine]" }
+/** Data structure for graph visualization @type {import("../index.js").GraphData} */
+const MetaData = { edges: new Map(), nodes: new Map(), machine: "[machine]" }
 
-/** Relation structure Machine @type {import("../actions/relation.js").MachineRelation}*/
+/** Relation structure Machine @type {import("../actions/relation_Machine_Graph.js").MachineRelation}*/
 const MachineRelation = { edges: new Map(), nodes: new Map() }
 
 /** Graph bounding box @type {GraphBounding} */
-const GraphBounding = { edges: new Map(), nodes: new Map() }
+const MetaBounding = { edges: new Map(), nodes: new Map() }
 
-/** Graph LCA relation @type {import("../actions/relation.js").GraphRelation} */
-let GraphRelation
+/** Graph LCA relation @type {import("../actions/relation_Machine_Graph.js").GraphRelation} */
+const MetaRelation = { edges: new Map(), nodes: new Map() }
+
+/** Graph Lines @type {Map<string, string>} */
+const MetaLines = new Map()
 
 let rootID
-
+/**@type {import("./simulator.js").Simulator} */
 let simulator
 onmessage = async ({ data: { type, params } }) => {
   switch (type) {
+    case "STATE.PREVIEW.SET":
+      console.log("STATE.PREVIEW.SET", params)
+      simulator.send({ type: "EVENT.PREVIEW", eventType: params })
+      break
+    case "STATE.PREVIEW.CLEAR":
+      console.log("STATE.PREVIEW.CLEAR", params)
+      simulator.send({ type: "PREVIEW.CLEAR" })
+      break
     case "DOM.IDLE":
       const machine = await fetchMachine(params)
       rootID = machine.id
       //@ts-ignore TODO: fix type
-      const /**@type {import("../actions/repr.js").Machine}*/ machineObj = machine.toJSON()
-      representation(machineObj, GraphInfo, MachineRelation)
-      postMessage({ type: "DOM.RENDER", params: { ...GraphInfo, machine: rootID } })
-      GraphRelation = machineToGraphRelation(MachineRelation)
+      const /**@type {import("../actions/relation_.js").Machine}*/ Machine = machine.toJSON()
+      representation(Machine, MetaData, MachineRelation)
+      postMessage({ type: "DOM.RENDER", params: { ...MetaData, machine: rootID } })
+      relation_Machine_to_Graph(MachineRelation, MetaRelation)
 
       simulator = createSimulator({
         machine: machine,
         state: machine.getInitialState(null),
       }).start()
       simulator.onTransition((state, transition) => {
+        switch (transition.type) {
+          case "EVENT.PREVIEW":
+            if (state.context.previewEvent) {
+              const previewIds = state.context.machine
+                .transition(state.context.state, { type: state.context.previewEvent })
+                .configuration.map((i) => i.id)
+
+              const edges = []
+              for (const edge of MachineRelation.edges.values()) {
+                if (previewIds.includes(edge.source)) {
+                  edges.push(edge.id)
+                }
+              }
+              console.log(edges)
+              const lines = []
+              const nodes = []
+              postMessage({ type: "STATE.PREVIEW.SET", params: previewIds })
+            }
+            break
+          case "PREVIEW.CLEAR":
+            postMessage({ type: "STATE.PREVIEW.CLEAR" })
+            break
+          default:
+            break
+        }
+        console.log("[simulator]", transition.type, state.context)
         const active = state.context.state.configuration.map((i) => i.id)
         postMessage({ type: "STATE.ACTIVE", params: active })
         // console.log("[simulator]", transition.type, state.value)
@@ -74,17 +111,17 @@ onmessage = async ({ data: { type, params } }) => {
     case "DOM.BOUNDED":
       // ======================= SET DOM BOUNDING SIZE ======================
       const /** @type {import("types").GraphSize}}*/ { edges, nodes } = params
-      for (let [id, size] of nodes) GraphBounding.nodes.set(id, { size })
-      for (let [id, size] of edges) GraphBounding.edges.set(id, { size })
+      for (let [id, size] of nodes) MetaBounding.nodes.set(id, { size })
+      for (let [id, size] of edges) MetaBounding.edges.set(id, { size })
       // ======================= ELK ALGORITHM ======================
       /**
        * @param {string} nodeID
        * @returns {import("elkjs").ElkNode}
        */
       function getElkChild(nodeID) {
-        const size = GraphBounding.nodes.get(nodeID).size
+        const size = MetaBounding.nodes.get(nodeID).size
         const relationMachine = MachineRelation.nodes.get(nodeID)
-        const relationNode = GraphRelation.nodes.get(nodeID) || []
+        const relationNode = MetaRelation.nodes.get(nodeID) || []
         return {
           id: nodeID,
           width: size.width,
@@ -102,9 +139,9 @@ onmessage = async ({ data: { type, params } }) => {
        * @returns {import("elkjs").ElkExtendedEdge}
        */
       const getElkEdge = (edgeID) => {
-        const size = GraphBounding.edges.get(edgeID).size
+        const size = MetaBounding.edges.get(edgeID).size
         const relationTransition = MachineRelation.edges.get(edgeID)
-        const edgeInfo = GraphInfo.edges.get(edgeID)
+        const edgeInfo = MetaData.edges.get(edgeID)
         return {
           id: edgeID,
           sources: [relationTransition.source],
@@ -124,7 +161,7 @@ onmessage = async ({ data: { type, params } }) => {
         }
       }
       // ==================== LAYOUT EDGES/NODES ======================
-      const rootEdges = GraphRelation.nodes.has(undefined) ? GraphRelation.nodes.get(undefined) : []
+      const rootEdges = MetaRelation.nodes.has(undefined) ? MetaRelation.nodes.get(undefined) : []
       const layoutElkNode = await elk.layout({
         id: "root",
         edges: rootEdges.map(getElkEdge), // Само-переходы машины
@@ -139,9 +176,9 @@ onmessage = async ({ data: { type, params } }) => {
 
       /** @param {import("elkjs").ElkExtendedEdge} elkEdge */
       const setEdgeLayout = (elkEdge) => {
-        const lca = GraphRelation.edges.get(elkEdge.id)
+        const lca = MetaRelation.edges.get(elkEdge.id)
         const elkLca = stateNodeToElkNodeMap.get(lca)
-        const edge = GraphBounding.edges.get(elkEdge.id)
+        const edge = MetaBounding.edges.get(elkEdge.id)
         edge.sections = elkLca
           ? elkEdge.sections.map((section) => ({
               ...section,
@@ -171,7 +208,7 @@ onmessage = async ({ data: { type, params } }) => {
        * @param {import("src/actions/layout.js").ELKNode | undefined} parent
        */
       const setLayout = (elkNode, parent) => {
-        const node = GraphBounding.nodes.get(elkNode.id)
+        const node = MetaBounding.nodes.get(elkNode.id)
         stateNodeToElkNodeMap.set(elkNode.id, elkNode)
         elkNode.absolutePosition = {
           x: (parent?.absolutePosition.x ?? 0) + elkNode.x,
@@ -192,14 +229,12 @@ onmessage = async ({ data: { type, params } }) => {
       }
       layoutElkNode.edges.forEach(setEdgeLayout)
       setLayout(layoutElkNode.children[0], undefined)
-      postMessage({ type: "DOM.LAYOUT", params: GraphBounding })
+      postMessage({ type: "DOM.LAYOUT", params: MetaBounding })
       // ======================= LINES =================================
-      const lines = new Map()
-
       for (const [id, edge] of MachineRelation.edges) {
-        const sourceBound = GraphBounding.nodes.get(edge.source)
-        const edgeBound = GraphBounding.edges.get(id)
-        const targetBound = GraphBounding.nodes.get(edge.target)
+        const sourceBound = MetaBounding.nodes.get(edge.source)
+        const edgeBound = MetaBounding.edges.get(id)
+        const targetBound = MetaBounding.nodes.get(edge.target)
         const sections = edgeBound.sections || []
         const sourceRect = {
           ...sourceBound.position,
@@ -242,11 +277,11 @@ onmessage = async ({ data: { type, params } }) => {
             path.push(["L", endPoint])
           } else path = getPath(sourceRect, edgeRect, targetRect)
           if (path) {
-            lines.set(id, pathToD(path))
+            MetaLines.set(id, pathToD(path))
           }
         }
       }
-      postMessage({ type: "LINES.INIT", params: lines })
+      postMessage({ type: "LINES.INIT", params: MetaLines })
       break
     default:
       console.log("[worker]", type, params)

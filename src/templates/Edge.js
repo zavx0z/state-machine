@@ -1,12 +1,12 @@
 /**EdgeInfo
- * @typedef {Object} EdgeInfo
+ * @typedef {Object} data_Edge
  * @property {string} type - edge type
  * @property {string} [label] - edge label
  * @property {string} [cond] - edge condition
  */
 
 /**Transition visualization component
- * @param { EdgeInfo & {id:string} } props - Property object
+ * @param { data_Edge & {id:string} } props - Property object
  * @returns {string} */
 export default ({ id, type, label, cond }) => /*html*/ `
 <div class="edge" id="${id}" data-active="false" data-preview="false">

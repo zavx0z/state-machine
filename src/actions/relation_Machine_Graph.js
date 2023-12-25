@@ -16,10 +16,10 @@
 
 /**
  * @param {MachineRelation} MachineRelation
+ * @param {GraphRelation} GraphRelation
  * @returns {GraphRelation}
  */
-export function machineToGraphRelation(MachineRelation) {
-  const { edges, nodes } = MachineRelation
+export default function relation_Machine_Graph(MachineRelation, GraphRelation) {
   const nodeRelations = new Map()
   const edgeRelations = new Map()
 
@@ -28,7 +28,7 @@ export function machineToGraphRelation(MachineRelation) {
    * @param {string} targetID - id node target
    */
   const getLCA = (sourceID, targetID) => {
-    const parent = nodes.get(sourceID).parent
+    const parent = MachineRelation.nodes.get(sourceID).parent
     // 1. Само-переход. Если узлы совпадают, возвращаем их родителя
     if (sourceID === targetID) return parent
     // 2. Общий предок
@@ -37,22 +37,22 @@ export function machineToGraphRelation(MachineRelation) {
     node = parent
     while (node) {
       set.add(node)
-      node = nodes.get(node).parent
+      node = MachineRelation.nodes.get(node).parent
     }
     node = targetID // Поиск ближайшего общего предка
     while (node) {
       if (set.has(node)) return node // Если предок второго узла найден в множестве, возвращаем его
-      node = nodes.get(node).parent // Переходим к следующему предку узла назначения
+      node = MachineRelation.nodes.get(node).parent // Переходим к следующему предку узла назначения
     }
     // 3. Корневая нода
     return sourceID
   }
 
-  for (let [edgeID, edge] of edges) {
+  for (let [edgeID, edge] of MachineRelation.edges) {
     const lca = getLCA(edge.source, edge.target) // Находим ближайшего общего предка узлов источника перехода
-    if (!nodeRelations.has(lca)) nodeRelations.set(lca, []) // Если общего предка нет в карте, добавляем в виде ключа ноду и в виде значения пустой массив
-    nodeRelations.get(lca).push(edgeID) // Добавляем переход в список ноды предка
-    edgeRelations.set(edgeID, lca) // Записываем связь между идентификатором перехода и предка
+    if (!GraphRelation.nodes.has(lca)) GraphRelation.nodes.set(lca, []) // Если общего предка нет в карте, добавляем в виде ключа ноду и в виде значения пустой массив
+    GraphRelation.nodes.get(lca).push(edgeID) // Добавляем переход в список ноды предка
+    GraphRelation.edges.set(edgeID, lca) // Записываем связь между идентификатором перехода и предка
   }
   return { edges: edgeRelations, nodes: nodeRelations }
 }

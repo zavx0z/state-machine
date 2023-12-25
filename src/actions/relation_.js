@@ -1,14 +1,12 @@
 import { flatten } from "../utils/utils.js"
-/**
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm").StateNodeDefinition<any, any, any> & { transition: string[]}} Machine
+/** @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm").StateNodeDefinition<any, any, any> & { transition: string[]}} Machine */
+
+/** Converts a state machine to a graph representation.
+ * @param {Machine} Machine - The state machine.
+ * @param {import("../index.js").GraphData} MetaData - Data state/transition/actions/services of the machine.
+ * @param {import("./relation_Machine_Graph.js").MachineRelation} MachineRelation - The relation transition and nodes of the machine.
  */
-/**
- * Converts a state machine to a graph representation.
- * @param {Machine} machine - The state machine.
- * @param {import("../index.js").GraphInfo} info - The graph info.
- * @param {import("./relation.js").MachineRelation} relation - The graph relation.
- */
-export function representation(machine, info, relation) {
+export function representation(Machine, MetaData, MachineRelation) {
   /** Generates a directed graph representation of a state machine or state node.
    * @param {Machine | import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm").AnyStateNodeDefinition} stateNode - The state machine or state node.
    * @param {string | undefined}  parentUUID - node UUID of the parent node.
@@ -27,12 +25,12 @@ export function representation(machine, info, relation) {
           // console.log(transition) // TODO: actions
           const transitionID = `${stateID}:${transitionIndex}:${targetIndex}`
           // const transitionUUID = uuidv4()
-          info.edges.set(transitionID, {
+          MetaData.edges.set(transitionID, {
             type: transition.eventType,
             cond: transition.cond?.type ? "scxml" : transition.cond?.name, // TODO: condition
             label: transition.eventType, //TODO: label
           })
-          relation.edges.set(transitionID, {
+          MachineRelation.edges.set(transitionID, {
             id: transitionID,
             source: stateID,
             target: String(target).replace(/^#/, ""),
@@ -40,7 +38,7 @@ export function representation(machine, info, relation) {
         })
       })
     )
-    info.nodes.set(stateID, {
+    MetaData.nodes.set(stateID, {
       type: stateNode.type,
       key: stateNode.key,
       entry: stateNode.entry.map((entry) => entry.type),
@@ -48,7 +46,7 @@ export function representation(machine, info, relation) {
       invoke: stateNode.invoke.map((invoke) => (typeof invoke.src === "object" ? invoke.src.type : invoke.src)),
       tags: stateNode.tags,
     })
-    relation.nodes.set(stateID, {
+    MachineRelation.nodes.set(stateID, {
       id: stateID,
       children: Object.values(stateNode.states)
         .toSorted((a, b) => b.order - a.order)
@@ -57,5 +55,5 @@ export function representation(machine, info, relation) {
     })
     Object.values(stateNode.states).map((state) => repr(state, stateID))
   }
-  repr(machine, undefined)
+  repr(Machine, undefined)
 }
