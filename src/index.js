@@ -73,6 +73,10 @@ class StateMachine extends HTMLElement {
         case "PREVIEW":
           for (const state of params.nodes) this.#host.getElementById(state).dataset.preview = "true"
           for (const edge of params.edges) this.#host.getElementById(edge).dataset.preview = "true"
+          for (const edge of params.edges) {
+            const element = this.#host.querySelector(`svg [id='${edge}']`)
+            if (element instanceof SVGElement) element.dataset.preview = "true"
+          }
           break
         default:
           console.log("[shadow]", type, params)
@@ -121,11 +125,16 @@ class StateMachine extends HTMLElement {
       const template = document.createElement("template")
       template.innerHTML = Edge({ ...edge, id })
       const element = template.content.firstElementChild
-      element.addEventListener("click", () => this.#worker.postMessage({ type: "EVENT", params: { type: edge.type } }))
+      element.addEventListener("click", () => {
+        this.#host.querySelectorAll('[data-preview="true"]').forEach((element) => {
+          if (element instanceof HTMLElement || element instanceof SVGElement) element.dataset.preview = "false"
+        })
+        this.#worker.postMessage({ type: "EVENT", params: { type: edge.type } })
+      })
       element.addEventListener("mouseenter", () => this.#worker.postMessage({ type: "PREVIEW", params: edge.type }))
       element.addEventListener("mouseleave", (event) => {
         this.#host.querySelectorAll('[data-preview="true"]').forEach((element) => {
-          if (element instanceof HTMLElement) element.dataset.preview = "false"
+          if (element instanceof HTMLElement || element instanceof SVGElement) element.dataset.preview = "false"
         })
       })
       container.content.append(template.content)

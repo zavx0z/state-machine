@@ -72,21 +72,26 @@ onmessage = async ({ data: { type, params } }) => {
         state: machine.getInitialState(null),
       }).start()
       simulator.onTransition((state, transition) => {
-        const active = { nodes: [], edges: [] }
         switch (transition.type) {
           case "PREVIEW":
             if (state.context.previewEvent) {
               const preview = { nodes: [], edges: [] }
-              for (const node of state.context.machine .transition(state.context.state, { type: state.context.previewEvent }).configuration) {
-                if (!active.nodes.includes(node.id))
+              for (const node of state.context.machine.transition(state.context.state, {
+                type: state.context.previewEvent,
+              }).configuration) {
+                if (!state.context.state.configuration.map((state) => state.id).includes(node.id)) {
                   preview.nodes.push(node.id)
-                MachineRelation.nodes.get(node.id).transitions.map((edge) => preview.edges.push(edge))
+                  MachineRelation.nodes.get(node.id).transitions.map((edge) => preview.edges.push(edge))
+                }
               }
-              postMessage({ type: "PREVIEW", params: preview })
+              if (preview.nodes.length || preview.edges.length) {
+                postMessage({ type: "PREVIEW", params: preview })
+              }
               simulator.send({ type: "PREVIEW", eventType: undefined })
             } else console.log("PREVIEW.CLEAR")
             break
           case "STATE.UPDATE":
+            const active = { nodes: [], edges: [] }
             for (const node of state.context.state.configuration) {
               active.nodes.push(node.id)
               MachineRelation.nodes.get(node.id).transitions.map((edge) => active.edges.push(edge))

@@ -5,10 +5,10 @@
   line-height: 1.5rem; /* 24px */
   --primary-200: var(--color-primary-200, 225 243 250);
   --primary-500: var(--color-primary-500, 135 206 235);
-  --primary-900: var(--color-primary-900: 66 101 115;);
+  --primary-900: var(--color-primary-900, 66 101 115);
 
-  --secondary-500: var(--color-secondary-500: 71 189 116;);
-  --tertiary-500: var(--color-tertiary-500: 191 200 209;);
+  --secondary-500: var(--color-secondary-500, 71 189 116);
+  --tertiary-500: var(--color-tertiary-500, 191 200 209);
   --tertiary-700: var(--color-tertiary-700, 143 150 157);
   --tertiary-900: var(--color-tertiary-900, 94 98 102);
   --surface-500: var(--color-surface-500, 56 77 107);
@@ -32,6 +32,12 @@
   transition-duration: 150ms;
   z-index: 1;
 }
+.node[data-active="true"] {
+  opacity: 1;
+}
+.node[data-preview="true"] {
+  opacity: 1;
+}
 .node-container {
   height: 100%;
   border-style: solid;
@@ -48,7 +54,7 @@
   align-self: flex-start;
   overflow: hidden;
   background-color: rgb(var(--surface-700) / var(--bg-opacity, 1));
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-property: background-color;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -63,9 +69,6 @@
 }
 .node-content:not(:has(.node-content .actions)) {
   border-radius: 0.5rem;
-}
-.node[data-active="true"] {
-  opacity: 1;
 }
 .node-type {
   display: flex;
@@ -126,12 +129,18 @@
   border-color: rgb(var(--primary-500) / var(--border-opacity, 1));
   color: rgb(var(--surface-500) / var(--text-opacity, 1));
 }
+.edge[data-preview="true"] {
+  border-color: rgb(var(--primary-900) / var(--border-opacity, 1));
+}
 .edge-label {
   background-color: rgb(var(--tertiary-900) / var(--bg-opacity, 1));
   padding: 0.25rem /* 4px */ 0.5rem /* 8px */;
 }
 .edge[data-active="true"] .edge-label {
   background-color: rgb(var(--primary-500) / var(--bg-opacity, 1));
+}
+.edge[data-preview="true"] .edge-label {
+  background-color: rgb(var(--surface-800) / var(--bg-opacity, 1));
 }
 .edge-label[data-cond="true"] {
   border-top-left-radius: 1rem /* 16px */;
@@ -189,4 +198,8 @@ svg {
 .line[data-active="true"] {
   fill: rgb(var(--primary-500) / var(--bg-opacity, 1));
   stroke: rgb(var(--primary-500) / var(--bg-opacity, 1));
+}
+.line[data-preview="true"] {
+  fill: rgb(var(--primary-900) / 1);
+  stroke: rgb(var(--primary-900) / 1);
 }
