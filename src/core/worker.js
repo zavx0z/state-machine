@@ -107,7 +107,11 @@ onmessage = async ({ data: { type, params } }) => {
       break
     case "DOM.BOUNDED":
       // ======================= SET DOM BOUNDING SIZE ======================
-      const /** @type {import("types").GraphSize}}*/ { edges, nodes } = params
+      /**
+       * @typedef { { width: number; height: number } } Size
+       * @type { { nodes: Map<string, Size>; edges: Map<string, Size> } } GraphSize
+       */
+      const { edges, nodes } = params
       for (let [id, size] of nodes) MetaBounding.nodes.set(id, { size })
       for (let [id, size] of edges) MetaBounding.edges.set(id, { size })
       // ======================= ELK ALGORITHM ======================

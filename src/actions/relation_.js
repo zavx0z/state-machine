@@ -1,5 +1,5 @@
 import { flatten } from "../utils/utils.js"
-/** @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm").StateNodeDefinition<any, any, any> & { transition: string[]}} Machine */
+/** @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").StateNodeDefinition<any, any, any> & { transition: string[]}} Machine */
 
 /** Converts a state machine to a graph representation.
  * @param {Machine} Machine - The state machine.
@@ -8,7 +8,7 @@ import { flatten } from "../utils/utils.js"
  */
 export function representation(Machine, MetaData, MachineRelation) {
   /** Generates a directed graph representation of a state machine or state node.
-   * @param {Machine | import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm").AnyStateNodeDefinition} stateNode - The state machine or state node.
+   * @param {Machine | import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").AnyStateNodeDefinition} stateNode - The state machine or state node.
    * @param {string | undefined}  parentUUID - node UUID of the parent node.
    */
   function repr(stateNode, parentUUID) {

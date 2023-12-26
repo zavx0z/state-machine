@@ -87,7 +87,7 @@ class StateMachine extends HTMLElement {
   connectedCallback() {
     // Get size information for each node and edge element and send it to the this.#worker thread
     const observer = new MutationObserver(() => {
-      const /** @type {import("types").GraphSize}}*/ graphSize = { nodes: new Map(), edges: new Map() }
+      const /** @type {import("./core/worker.js").GraphSize}}*/ graphSize = { nodes: new Map(), edges: new Map() }
       for (let element of this.#host.children) {
         switch (element.className) {
           case "node":

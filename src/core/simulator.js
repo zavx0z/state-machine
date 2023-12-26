@@ -1,10 +1,12 @@
-import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm"
+import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm"
+
 /**
- * @typedef {import("types").AnyState} AnyState
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.7/+esm").AnyStateMachine} AnyStateMachine
- * @typedef {import("types").EventType} EventType
- * @typedef {import("types").EventObject} EventObject
- * @typedef {import("types").Interpreter} Interpreter
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").AnyState} AnyState
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").AnyStateMachine} AnyStateMachine
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").EventType} EventType
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").EventObject} EventObject
+ */
+
 /** Context
  * @typedef {Object} InputType
  * @property {AnyStateMachine} InputType.machine - Машина конечного автомата (AnyStateMachine)
@@ -21,7 +23,7 @@ import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.n
  * @property {SimulatorEvents} [schema.events]
  * @property {InputType} [schema.context]
 
- * @typedef {import("types").InterpreterMachine<InputType, SimulatorEvents>} Simulator
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").InterpreterMachine<InputType, SimulatorEvents>} Simulator
 */
 
 /**
