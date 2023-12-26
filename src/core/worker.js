@@ -4,6 +4,7 @@ import { createSimulator } from "./simulator.js"
 import relation_Machine_to_Graph from "../actions/relation_Machine_Graph.js"
 import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk-api.min.js"
 import { getPath, pathToD } from "../actions/svgPath.js"
+import { interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm"
 
 /**
  * @typedef {Object} Size
@@ -60,8 +61,24 @@ onmessage = async ({ data: { type, params } }) => {
   switch (type) {
     case "CREATE":
       const machine = await fetchMachine(params)
+      console.log(machine)
+      const config = {
+        actions: {},
+        delays: {},
+        services: {
+          load: (context, event) => {
+            console.log("load", context, event)
+          },
+        },
+      }
+      //@ts-ignore
+      const actor = interpret(machine.withConfig(config))
+      actor.onTransition((state, transition) => {
+        console.log(transition.type, state)
+      })
+      actor.start()
       rootID = machine.id
-      //@ts-ignore TODO: fix type
+      //@ts-ignore TODO: fix typeP
       const /**@type {import("../actions/relation_.js").Machine}*/ Machine = machine.toJSON()
       representation(Machine, Data, MachineRelation)
       postMessage({ type: "CREATE", params: { ...Data, machine: rootID } })

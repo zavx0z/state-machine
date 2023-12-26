@@ -1,16 +1,16 @@
 /**
  * @typedef {import("https://cdn.jsdelivr.net/npm/xml-js@1.6.11/+esm").Element} XMLElement
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").EventObject} EventObject
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").ActionObject} ActionObject
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").SCXMLEventMeta} SCXMLEventMeta
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").ChooseCondition} ChooseCondition
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").AnyStateMachine} AnyStateMachine
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").EventObject} EventObject
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").ActionObject} ActionObject
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").SCXMLEventMeta} SCXMLEventMeta
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").ChooseCondition} ChooseCondition
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").AnyStateMachine} AnyStateMachine
 
  * @typedef {Object} ScxmlToMachineOptions
  * @property {string} [ delimiter]
  */
 import { xml2js } from "https://cdn.jsdelivr.net/npm/xml-js@1.6.11/+esm"
-import { createMachine, actions } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm"
+import { createMachine, actions } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm"
 import { mapValues } from "./utils.js"
 /** Retrieves the value of the specified attribute from the given XML element.
  * @param {XMLElement} element - The XML element from which to retrieve the attribute.

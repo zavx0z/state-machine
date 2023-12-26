@@ -1,10 +1,10 @@
-import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm"
+import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm"
 
 /**
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").AnyState} AnyState
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").AnyStateMachine} AnyStateMachine
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").EventType} EventType
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").EventObject} EventObject
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").AnyState} AnyState
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").AnyStateMachine} AnyStateMachine
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").EventType} EventType
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").EventObject} EventObject
  */
 
 /** Context
@@ -23,7 +23,7 @@ import { assign, interpret, createMachine, sendTo } from "https://cdn.jsdelivr.n
  * @property {SimulatorEvents} [schema.events]
  * @property {InputType} [schema.context]
 
- * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").InterpreterMachine<InputType, SimulatorEvents>} Simulator
+ * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").InterpreterMachine<InputType, SimulatorEvents>} Simulator
 */
 
 /**
@@ -58,7 +58,6 @@ export function createSimulator(input) {
         invoke: {
           id: "machine",
           src: (ctx) => (sendBack, onReceive) => {
-            console.log("starting again")
             const actor = interpret(ctx.machine)
               .onTransition((state) => sendBack({ type: "STATE.UPDATE", state }))
               .start()
