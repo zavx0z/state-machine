@@ -1,20 +1,18 @@
 /**
  * @typedef {import("https://cdn.jsdelivr.net/npm/xml-js@1.6.11/+esm").Element} XMLElement
- *
  * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").EventObject} EventObject
  * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").ActionObject} ActionObject
  * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").SCXMLEventMeta} SCXMLEventMeta
  * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").ChooseCondition} ChooseCondition
  * @typedef {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm").AnyStateMachine} AnyStateMachine
+
  * @typedef {Object} ScxmlToMachineOptions
  * @property {string} [ delimiter]
  */
 import { xml2js } from "https://cdn.jsdelivr.net/npm/xml-js@1.6.11/+esm"
 import { createMachine, actions } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm"
 import { mapValues } from "./utils.js"
-
-/**
- * Retrieves the value of the specified attribute from the given XML element.
+/** Retrieves the value of the specified attribute from the given XML element.
  * @param {XMLElement} element - The XML element from which to retrieve the attribute.
  * @param {string} attribute - The name of the attribute to retrieve.
  * @returns {(string | number | undefined)} - The value of the attribute, or undefined if not found.
@@ -22,8 +20,7 @@ import { mapValues } from "./utils.js"
 function getAttribute(element, attribute) {
   return element.attributes ? element.attributes[attribute] : undefined
 }
-/**
- * Converts an array of items into a record object using the specified identifier.
+/** Converts an array of items into a record object using the specified identifier.
  * @template T
  * @param {T[]} items - The array of items to be indexed.
  * @param {(string | ((item: T) => string))} identifier - The identifier key or a function that returns a string key for an item.
@@ -44,16 +41,11 @@ function indexedRecord(items, identifier) {
  * @returns {Object} A transition object with an actions property containing mapped actions.
  */
 function executableContent(elements) {
-  const transition = {
-    actions: mapActions(elements),
-  }
-
+  const transition = { actions: mapActions(elements) }
   return transition
 }
-/**
- * Parses the target attribute and returns an array of target IDs prefixed with '#'.
+/** Parses the target attribute and returns an array of target IDs prefixed with '#'.
  * If the target attribute is not provided, it returns undefined.
- *
  * @param {string|number} [targetAttr] - The target attribute which can be a string or number.
  * @returns {string[]|undefined} An array of target IDs or undefined if the targetAttr is not provided.
  */
@@ -67,7 +59,6 @@ function getTargets(targetAttr) {
  * If the delay is a string, it can be in the format of milliseconds (e.g., "100ms")
  * or seconds (e.g., "1.5s"). If the delay is a number, it is assumed to be in milliseconds.
  * If the delay is undefined or an invalid string format, the function returns undefined.
- *
  * @param {string|number} [delay] - The delay value to convert to milliseconds.
  * @returns {number|undefined} The delay in milliseconds or undefined if the input is invalid.
  * @throws {Error} Throws an error if the delay string is in an invalid format.
@@ -80,9 +71,7 @@ function delayToMs(delay) {
   const secondsMatch = delay.match(/(\d*)(\.?)(\d+)s/)
   if (secondsMatch) {
     const hasDecimal = !!secondsMatch[2]
-    if (!hasDecimal) {
-      return parseInt(secondsMatch[3], 10) * 1000
-    }
+    if (!hasDecimal) return parseInt(secondsMatch[3], 10) * 1000
     const secondsPart = !!secondsMatch[1] ? parseInt(secondsMatch[1], 10) * 1000 : 0
     const millisecondsPart = parseInt(secondsMatch[3].padEnd(3, "0"), 10)
     if (millisecondsPart >= 1000) throw new Error(`Can't parse "${delay}" delay.`)
@@ -90,9 +79,7 @@ function delayToMs(delay) {
   }
   throw new Error(`Can't parse "${delay}" delay.`)
 }
-/**
- * Evaluates a string of executable content within the context of a state machine's current context and event.
- *
+/** Evaluates a string of executable content within the context of a state machine's current context and event.
  * @param {object} context - The current state context of the state machine.
  * @param {EventObject} _ev - The event object that triggered the transition.
  * @param {SCXMLEventMeta} meta - Metadata associated with the event.
@@ -114,10 +101,7 @@ const evaluateExecutableContent = (context, _ev, meta, body) => {
   const fn = new Function(...args, fnBody)
   return fn(context, meta._event)
 }
-
-/**
- * Creates a condition function that evaluates a given condition expression within the context of a state machine's current context and event.
- *
+/** Creates a condition function that evaluates a given condition expression within the context of a state machine's current context and event.
  * @param {string} cond - The condition expression to be evaluated.
  * @returns {Function} A function that takes the context, event, and metadata and returns the result of the condition evaluation.
  */
@@ -142,10 +126,8 @@ function mapAction(element) {
     }
     case "send": {
       const { event, eventexpr, target } = element.attributes
-
       let convertedEvent
       let convertedDelay
-
       const params =
         element.elements &&
         element.elements.reduce((acc, child) => {
@@ -175,11 +157,7 @@ function mapAction(element) {
           return evaluateExecutableContent(context, _ev, meta, fnBody)
         }
       }
-      //@ts-ignore
-      return actions.send(convertedEvent, {
-        delay: convertedDelay,
-        to: target,
-      })
+      return actions.sendTo(`${target}`, convertedEvent, { delay: convertedDelay })
     }
     case "log": {
       const label = element.attributes.label
@@ -233,9 +211,7 @@ function mapAction(element) {
       throw new Error(`Conversion of "${element.name}" elements is not implemented yet.`)
   }
 }
-/**
- * Maps an array of XMLElements to an array of ActionObjects.
- *
+/** Maps an array of XMLElements to an array of ActionObjects.
  * @param {XMLElement[]} elements - The array of XMLElements to map.
  * @returns {ActionObject[]} - The array of mapped ActionObjects.
  */
@@ -247,9 +223,7 @@ function mapActions(elements) {
   }
   return mapped
 }
-/**
- * Converts an SCXML node to a machine configuration object.
- *
+/** Converts an SCXML node to a machine configuration object.
  * @param {XMLElement} nodeJson - The SCXML node to convert.
  * @param {string} id - The ID of the node.
  * @param {ScxmlToMachineOptions} options - The options for the conversion.
@@ -340,18 +314,14 @@ function toConfig(nodeJson, id, options) {
   }
   return { id }
 }
-
-/**
- * Converts an SCXML JSON representation to a state machine configuration.
+/** Converts an SCXML JSON representation to a state machine configuration.
  * @param {XMLElement} scxmlJson - The SCXML JSON representation.
  * @param {ScxmlToMachineOptions} options - Options for the conversion.
  * @returns {AnyStateMachine} The state machine instance.
  */
 function scxmlToMachine(scxmlJson, options) {
   const machineElement = scxmlJson.elements.find((element) => element.name === "scxml")
-
   const dataModelEl = machineElement.elements.filter((element) => element.name === "datamodel")[0]
-
   const extState = dataModelEl
     ? dataModelEl.elements
         .filter((element) => element.name === "data")
@@ -363,7 +333,6 @@ function scxmlToMachine(scxmlJson, options) {
           return acc
         }, {})
     : undefined
-
   const nameMachine = String(machineElement.attributes.name || "[machine]")
   return createMachine({
     ...toConfig(machineElement, nameMachine, options),
@@ -372,13 +341,12 @@ function scxmlToMachine(scxmlJson, options) {
     predictableActionArguments: true,
   })
 }
-/**
- * Converts an SCXML XML string to a state machine configuration.
+/** Converts an SCXML XML string to a state machine configuration.
  * @param {string} xml - The SCXML XML string.
  * @param {ScxmlToMachineOptions} options - Options for the conversion.
  * @returns {AnyStateMachine} The state machine instance.
  */
 export function toMachine(xml, options) {
-  const /**@type {any} XMLElement*/ json = xml2js(xml)
+  const /**@type {*} XMLElement*/ json = xml2js(xml)
   return scxmlToMachine(json, options)
 }
