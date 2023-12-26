@@ -19,14 +19,22 @@ export default ({ id, type, label, cond }) => /*html*/ `
           </div> `
       } else if (type.startsWith("done.invoke.")) {
         const match = type.match(/^done\.invoke\.(.+)$/)
-        if (match && /:invocation\[/.test(match[1])) {
-          const matchInvoc = match[1].match(/:invocation\[(\d+)\]$/)
-          if (matchInvoc)
+        if (match) {
+          if (/:invocation\[/.test(match[1])) {
+            const matchInvoc = match[1].match(/:invocation\[(\d+)\]$/)
+            if (matchInvoc)
+              return /*html*/ `
+                <div class="edge-label-invoke edge-label-invoke-done">
+                  <em>done: </em>
+                  <div>anonymous [${matchInvoc[1]}]</div>
+                </div> `
+          } else {
             return /*html*/ `
               <div class="edge-label-invoke edge-label-invoke-done">
                 <em>done: </em>
-                <div>anonymous [${matchInvoc[1]}]</div>
+                <div>${match[1]}</div>
               </div> `
+          }
         }
       } else if (type.startsWith("error.platform.")) {
         const match = type.match(/^error\.platform\.(.+)$/)
