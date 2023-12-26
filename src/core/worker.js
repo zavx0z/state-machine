@@ -67,16 +67,17 @@ onmessage = async ({ data: { type, params } }) => {
         delays: {},
         services: {
           load: (context, event) => {
-            console.log("load", context, event)
+            return new Promise((resolve, reject) => {
+              console.log("load", context, event)
+              setTimeout(() => {
+                return reject("success")
+              }, 1000)
+            })
           },
         },
       }
       //@ts-ignore
       const actor = interpret(machine.withConfig(config))
-      actor.onTransition((state, transition) => {
-        console.log(transition.type, state)
-      })
-      actor.start()
       rootID = machine.id
       //@ts-ignore TODO: fix typeP
       const /**@type {import("../actions/relation_.js").Machine}*/ Machine = machine.toJSON()
@@ -88,6 +89,13 @@ onmessage = async ({ data: { type, params } }) => {
         machine: machine,
         state: machine.getInitialState(null),
       }).start()
+
+      actor.onTransition((state, transition) => {
+        simulator.send("EVENT", { event: transition })
+        console.log(transition, state)
+      })
+      actor.start()
+
       simulator.onTransition((state, transition) => {
         switch (transition.type) {
           case "PREVIEW":

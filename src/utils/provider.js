@@ -1,4 +1,4 @@
-import { toMachine } from "../machine/scxml.js"
+import { toMachine } from "../scxml/scxml.js"
 
 /**
  * Fetches a machine definition from a URL, converts it to a machine instance,
