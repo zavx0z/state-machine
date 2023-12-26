@@ -4,6 +4,9 @@
         "module": "NodeNext",
         "baseUrl": ".",
         "paths": {
+            "https://cdn.jsdelivr.net/npm/xml-js@1.6.11/+esm": [
+                "../node_modules/xml-js"
+            ],
             "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm": [
                 "../dist"
             ],

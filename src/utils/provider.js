@@ -1,4 +1,4 @@
-import { toMachine } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.8/+esm"
+import { toMachine } from "../machine/scxml.js"
 
 /**
  * Fetches a machine definition from a URL, converts it to a machine instance,
