@@ -22,13 +22,19 @@ function getTargets(targetAttr) {
 
 export function createTransition(transitionElements, invokeElements) {
   return transitionElements.map((value) => {
+    
     const scxmlEvent = getStringAttribute(value, "event")
     let event
     if (scxmlEvent && scxmlEvent.startsWith("done.") && invokeElements.length) {
       const source = scxmlEvent.split(".")[1]
       const invoke = invokeElements.filter((i) => i.attributes.id === source || i.attributes.src === source)
       event = invoke.length ? `done.invoke.${source}` : scxmlEvent
+    } else if (scxmlEvent && scxmlEvent.startsWith("error.") && invokeElements.length) {
+      const source = scxmlEvent.split(".")[1]
+      const invoke = invokeElements.filter((i) => i.attributes.id === source || i.attributes.src === source)
+      event = invoke.length ? `error.platform.${source}` : scxmlEvent
     } else event = scxmlEvent
+
     const targets = getAttribute(value, "target")
     const internal = getAttribute(value, "type") === "internal"
     return {
