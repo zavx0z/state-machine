@@ -4,7 +4,7 @@ import { createSimulator } from "./simulator.js"
 import relation_Machine_to_Graph from "../actions/relation_Machine_Graph.js"
 import { getPath, pathToD } from "../actions/svgPath.js"
 import { interpret } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm"
-import { ElkApi } from "../utils/elkapi.js"
+import { ElkApi } from "../utils/elk-api.js"
 /**
  * @typedef {Object} Size
  * @property {number} width
@@ -31,26 +31,7 @@ import { ElkApi } from "../utils/elkapi.js"
  * @typedef {{ edges:Map<string, EdgeBoundingBox>, nodes: Map<string, BoundingBox>}} GraphBounding
  *
  */
-
 const elk = new ElkApi()
-const graph = {
-  id: "root",
-  layoutOptions: { "elk.algorithm": "layered" },
-  children: [
-    { id: "n1", width: 30, height: 30 },
-    { id: "n2", width: 30, height: 30 },
-    { id: "n3", width: 30, height: 30 },
-  ],
-  edges: [
-    { id: "e1", sources: ["n1"], targets: ["n2"] },
-    { id: "e2", sources: ["n1"], targets: ["n3"] },
-  ],
-}
-
-elk
-  .layout(graph)
-  .then((result) => console.log("result", result))
-  .catch(console.error)
 /** Data structure for graph visualization @type {import("../index.js").Data} */
 const Data = { events: new Map(), states: new Map() }
 
@@ -77,9 +58,10 @@ let simulator
 let channel
 /**@type {import("https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm").AnyInterpreter} */
 let actor
+
 let ports = []
-self.addEventListener("connect", (event) => {
-  console.log("connect", event)
+addEventListener("connect", (event) => {
+  /** @ts-ignore */
   const port = event.ports[0]
   ports.push(port)
   port.start()
@@ -87,38 +69,36 @@ self.addEventListener("connect", (event) => {
     switch (type) {
       case "CREATE":
         const data = await fetchMachine(params)
-        channel = data.channel
-
+        // channel = data.channel
         const machine = data.machine
-        const config = {
-          actions: {},
-          delays: {},
-          services: {
-            load: (context, event) => {
-              return new Promise((resolve, reject) => {
-                console.log("load", context, event)
-                setTimeout(() => {
-                  // return resolve("success")
-                }, 1000)
-              })
-            },
-          },
-        }
+        // const config = {
+        //   actions: {},
+        //   delays: {},
+        //   services: {
+        //     load: (context, event) => {
+        //       return new Promise((resolve, reject) => {
+        //         console.log("load", context, event)
+        //         setTimeout(() => {
+        //           return resolve("success")
+        //         }, 1000)
+        //       })
+        //     },
+        //   },
+        // }
+        // actor = interpret(machine.withConfig(config))
         actor = interpret(machine)
         rootID = machine.id
         //@ts-ignore TODO: fix typeP
         const /**@type {import("../actions/relation_.js").Machine}*/ Machine = machine.toJSON()
         representation(Machine, Data, MachineRelation)
-        for (const port of ports) port.postMessage({ type: "CREATE", params: { ...Data, machine: rootID } })
+        port.postMessage({ type: "CREATE", params: { ...Data, machine: rootID } })
         relation_Machine_to_Graph(MachineRelation, MetaRelation)
-
         simulator = createSimulator({
           machine: machine,
           state: machine.getInitialState(null),
         }).start()
-
         actor.onTransition((state, transition) => {
-          channel.postMessage({ type: transition.type, state: state.value })
+          // channel.postMessage({ type: transition.type, state: state.value })
 
           simulator.send("EVENT", { event: transition })
           console.log(transition, state)
@@ -131,12 +111,10 @@ self.addEventListener("connect", (event) => {
           for (const port of ports) port.postMessage({ type: "EVENT", params: active })
         })
         actor.start()
-
-        channel.onmessage = ({ data }) => {
-          console.log("[worker]", data)
-        }
+        // channel.onmessage = ({ data }) => {
+        //   console.log("[worker]", data)
+        // }
         // setTimeout(() => actor.send({ type: "done.invoke.load", data: { success: "ok" } }), 2000)
-
         simulator.onTransition((state, transition) => {
           switch (transition.type) {
             case "PREVIEW":
@@ -151,7 +129,7 @@ self.addEventListener("connect", (event) => {
                   }
                 }
                 if (preview.nodes.length || preview.edges.length) {
-                  postMessage({ type: "PREVIEW", params: preview })
+                  for (const port of ports) port.postMessage({ type: "PREVIEW", params: preview })
                 }
                 simulator.send({ type: "PREVIEW", eventType: undefined })
               } else console.log("PREVIEW.CLEAR")
@@ -364,5 +342,3 @@ self.addEventListener("connect", (event) => {
     }
   })
 })
-// onmessage = async ({ data: { type, params } }) => {
-// }

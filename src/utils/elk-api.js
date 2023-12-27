@@ -1,12 +1,11 @@
+//@ts-ignore
 import elkjs from "https://cdn.jsdelivr.net/npm/@qix/elkjs-patched@0.8.0-patch3/+esm"
 export class ElkApi {
   #worker
   #id = 0
   #resolvers = {}
   #initialized = false
-
   constructor() {
-    //@ts-ignore
     this.#worker = new elkjs.Worker()
     this.#worker.onmessage = (answer) => {
       const json = answer.data
@@ -17,7 +16,6 @@ export class ElkApi {
       }
     }
   }
-
   async layout(graph, args) {
     const layoutOptions = args?.layoutOptions ?? {}
     const logging = args?.logging ?? false
@@ -54,11 +52,9 @@ export class ElkApi {
     return new Promise((resolve, reject) => {
       this.#resolvers[id] = (error, result) => {
         if (error) {
-          console.log("err", error)
           this.convertGwtStyleError(error)
           reject(error)
         } else {
-          console.log("res", result)
           resolve(result)
         }
       }
