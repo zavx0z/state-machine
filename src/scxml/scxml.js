@@ -8,6 +8,7 @@
 
  * @typedef {Object} ScxmlToMachineOptions
  * @property {string} [ delimiter]
+ * @property {BroadcastChannel} channel
  */
 import { xml2js } from "https://cdn.jsdelivr.net/npm/xml-js@1.6.11/+esm"
 import { createMachine, actions } from "https://cdn.jsdelivr.net/npm/@metafor/machine@0.0.9/+esm"
@@ -96,8 +97,8 @@ function toConfig(nodeJson, id, options) {
         }
         // throw new Error("Currently only converting invoke elements of type SCXML is supported.")
       }
-      const content = element.elements.find((el) => el.name === "content")
-      return scxmlToMachine(content, options)
+      // const content = element.elements.find((el) => el.name === "content")
+      // return toMachine(content, options)
     })
     return {
       id,
@@ -114,12 +115,13 @@ function toConfig(nodeJson, id, options) {
   }
   return { id }
 }
-/** Converts an SCXML JSON representation to a state machine configuration.
- * @param {XMLElement} scxmlJson - The SCXML JSON representation.
+/** Converts an SCXML XML string to a state machine configuration.
+ * @param {string} xmlString - The SCXML XML string.
  * @param {ScxmlToMachineOptions} options - Options for the conversion.
  * @returns {AnyStateMachine} The state machine instance.
  */
-function scxmlToMachine(scxmlJson, options) {
+export function toMachine(xmlString, options) {
+  const /**@type {*} XMLElement*/ scxmlJson = xml2js(xmlString)
   const machineElement = scxmlJson.elements.find((element) => element.name === "scxml")
   const dataModelEl = machineElement.elements.filter((element) => element.name === "datamodel")[0]
   const extState = dataModelEl
@@ -134,19 +136,11 @@ function scxmlToMachine(scxmlJson, options) {
         }, {})
     : undefined
   const nameMachine = String(machineElement.attributes.name || "[machine]")
-  return createMachine({
+  const machine = createMachine({
     ...toConfig(machineElement, nameMachine, options),
     context: extState,
     delimiter: options.delimiter,
     predictableActionArguments: true,
   })
-}
-/** Converts an SCXML XML string to a state machine configuration.
- * @param {string} xml - The SCXML XML string.
- * @param {ScxmlToMachineOptions} options - Options for the conversion.
- * @returns {AnyStateMachine} The state machine instance.
- */
-export function toMachine(xml, options) {
-  const /**@type {*} XMLElement*/ json = xml2js(xml)
-  return scxmlToMachine(json, options)
+  return machine
 }

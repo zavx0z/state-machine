@@ -6,6 +6,8 @@
 import Node from "./templates/Node.js"
 import Edge from "./templates/Edge.js"
 import Line from "./templates/Line.js"
+// import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk-api.min.js"
+// import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk.bundled.js"
 
 const template = document.createElement("template")
 template.innerHTML = /*html*/ `
@@ -13,12 +15,36 @@ template.innerHTML = /*html*/ `
 `
 class StateMachine extends HTMLElement {
   #host = this.attachShadow({ mode: "closed" })
-  #worker = new Worker("./src/core/worker.js", { type: "module" })
+  /** @type {SharedWorker} */
+  #worker
+  /** @type {BroadcastChannel} */
+  #channel
+  /**@type {import("elkjs").ELK} */
+  #elk
   constructor() {
     super()
     this.#host.appendChild(template.content)
-    this.#worker.postMessage({ type: "CREATE", params: this.getAttribute("src") })
-    this.#worker.onmessage = ({ data: { type, params } }) => {
+    const src = this.getAttribute("src")
+    this.#worker = new SharedWorker("./src/core/worker.js", { type: "module", name: src })
+    //@ts-ignore
+
+
+    // console.log(this.#elk)
+    // this.#elk.layout()
+    this.#worker.port.postMessage({ type: "CREATE", params: src })
+    this.#channel = new BroadcastChannel(src)
+    this.#channel.onmessage = ({ data }) => {
+      console.log("[host]", data)
+    }
+    console.log("[host]", this.#worker)
+    this.#worker.port.addEventListener(
+      "error",
+      (e) => {
+        throw new Error("WorkerIO Error: could not open SharedWorker", e)
+      },
+      false
+    )
+    this.#worker.port.addEventListener("message", ({ data: { type, params } }) => {
       switch (type) {
         case "CREATE":
           const /** @type {Data}*/ { events: edges, states: nodes } = params
@@ -82,7 +108,8 @@ class StateMachine extends HTMLElement {
           console.log("[shadow]", type, params)
           break
       }
-    }
+    })
+    this.#worker.port.start()
   }
   connectedCallback() {
     // Get size information for each node and edge element and send it to the this.#worker thread
@@ -100,12 +127,12 @@ class StateMachine extends HTMLElement {
         }
       }
       observer.disconnect()
-      this.#worker.postMessage({ type: "DOM.BOUNDED", params: graphSize })
+      this.#worker.port.postMessage({ type: "DOM.BOUNDED", params: graphSize })
     })
     observer.observe(this.#host, { childList: true })
   }
   disconnectedCallback() {
-    this.#worker.terminate()
+    this.#worker.port.close()
   }
   /**
    * Renders the graph nodes and edges into the component's shadow DOM.
@@ -129,9 +156,12 @@ class StateMachine extends HTMLElement {
         this.#host.querySelectorAll('[data-preview="true"]').forEach((element) => {
           if (element instanceof HTMLElement || element instanceof SVGElement) element.dataset.preview = "false"
         })
-        this.#worker.postMessage({ type: "EVENT", params: { type: edge.type } })
+        // this.#channel.postMessage({ type: edge.type })
+        this.#worker.port.postMessage({ type: "EVENT", params: { type: edge.type } })
       })
-      element.addEventListener("mouseenter", () => this.#worker.postMessage({ type: "PREVIEW", params: edge.type }))
+      element.addEventListener("mouseenter", () =>
+        this.#worker.port.postMessage({ type: "PREVIEW", params: edge.type })
+      )
       element.addEventListener("mouseleave", (event) => {
         this.#host.querySelectorAll('[data-preview="true"]').forEach((element) => {
           if (element instanceof HTMLElement || element instanceof SVGElement) element.dataset.preview = "false"

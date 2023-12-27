@@ -25,8 +25,13 @@
       }
     </style>
     <script type="module">
-      await new Promise((res) => import("https://zavx0z.github.io/dev-tools/index.js").then(() => setTimeout(res, 200)))
+      // await new Promise((res) => import("https://zavx0z.github.io/dev-tools/index.js").then(() => setTimeout(res, 200)))
       import("./src/index.js")
+      const src = document.querySelector("state-machine").getAttribute("src")
+      const channel = new BroadcastChannel(src)
+      channel.onmessage = ({data}) => {
+        // console.log("[main]", data)
+      }
     </script>
     <dev-tools mobile></dev-tools>
   </head>
