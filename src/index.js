@@ -6,44 +6,25 @@
 import Node from "./templates/Node.js"
 import Edge from "./templates/Edge.js"
 import Line from "./templates/Line.js"
-// import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk-api.min.js"
-// import "https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk.bundled.js"
 
 const template = document.createElement("template")
 template.innerHTML = /*html*/ `
 <link rel="stylesheet" href="./src/styles.css" type="text/css">
 `
 class StateMachine extends HTMLElement {
-  #host = this.attachShadow({ mode: "closed" })
-  /** @type {SharedWorker} */
-  #worker
-  /** @type {BroadcastChannel} */
-  #channel
-  /**@type {import("elkjs").ELK} */
-  #elk
+  /**@type {ShadowRoot} */ #host
+  /** @type {SharedWorker} */ #worker
   constructor() {
     super()
+    this.#host = this.attachShadow({ mode: "closed" })
     this.#host.appendChild(template.content)
+
     const src = this.getAttribute("src")
     this.#worker = new SharedWorker("./src/core/worker.js", { type: "module", name: src })
-    //@ts-ignore
-
-
-    // console.log(this.#elk)
-    // this.#elk.layout()
     this.#worker.port.postMessage({ type: "CREATE", params: src })
-    this.#channel = new BroadcastChannel(src)
-    this.#channel.onmessage = ({ data }) => {
-      console.log("[host]", data)
-    }
-    console.log("[host]", this.#worker)
-    this.#worker.port.addEventListener(
-      "error",
-      (e) => {
-        throw new Error("WorkerIO Error: could not open SharedWorker", e)
-      },
-      false
-    )
+    this.#worker.port.addEventListener("error", function () {
+      throw new Error("WorkerIO Error: could not open SharedWorker")
+    })
     this.#worker.port.addEventListener("message", ({ data: { type, params } }) => {
       switch (type) {
         case "CREATE":
